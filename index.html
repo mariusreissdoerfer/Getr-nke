@@ -2,33 +2,52 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Responsive Kacheln mit großen Touch-Buttons</title>
+  <title>Responsives Grid mit dynamischen Kacheln</title>
   <style>
     /* 
-      1) Allgemeiner Seitenhintergrund in einem diffuseren Grau.
-      2) Box-Sizing für zuverlässige Layout-Kontrolle.
+      Basis-Layout: 
+      - Hintergrund in einem weichen Grau 
+      - 1rem = Standardschriftgröße des Browsers (typ. 16px).
+      - Wir können bei Bedarf in :root oder html die font-size anpassen.
     */
-    * {
-      box-sizing: border-box;
-    }
     html, body {
       margin: 0;
       padding: 0;
       font-family: sans-serif;
       height: 100%;
-      background-color: #f2f2f2; /* weicher Grauton */
+      background-color: #f2f2f2; /* Weiches Grau */
+      font-size: 16px;          /* Basisgröße; Buttons/Texte skalieren mit */
     }
 
-    /* Haupt-Container für die Kacheln */
+    /* Damit Kacheln + Zusammenfassung nicht verdeckt werden. */
     .main-content {
-      margin: 0 auto;
       max-width: 900px;
-      padding: 10px 20px;
-      /* Der Abstand nach unten wird dynamisch per JS erhöht,
-         damit die fixierte Zusammenfassung nicht überdeckt. */
+      margin: 0 auto;
+      padding: 1rem; /* Abstand */
+      /* Der untere Rand wird per JS erhöht (siehe adjustLayout()),
+         damit die fixierte Zusammenfassung am Bildrand nicht überlappt. */
     }
 
-    /* Zusammenfassung fixiert am Seitenende */
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    /* 
+      RESPONSIVES GRID:
+      - repeat(auto-fit, minmax(180px, 1fr)):
+        Der Browser erzeugt so viele Kachel-Spalten, wie Platz ist,
+        jede Kachel mind. 180px breit und maximal 1fr (dehnt sich).
+      - Das bewirkt:
+         * Auf schmalen Handys ggf. nur 2 Kacheln je Zeile.
+         * Auf großen Displays 5, 6 oder 7 Kacheln, je nach Platz.
+    */
+    .drink-container {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    /* Fixierte Zusammenfassung unten */
     .summary {
       position: fixed;
       bottom: 0;
@@ -39,39 +58,35 @@
       background: #fff;
       border-top: 1px solid #ccc;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-
-      /* Maximale Höhe, damit sie nicht den gesamten Bildschirm überdeckt */
       max-height: 50vh;
       overflow-y: auto;
-
-      /* Innenabstand */
-      padding: 10px 20px;
+      padding: 1rem;
     }
 
     .summary h2 {
       margin-top: 0;
-      font-size: 1.1em;
-      margin-bottom: 8px;
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
     }
 
-    /* Tabelle in der Zusammenfassung */
     .summary-items {
       border: 1px solid #ddd;
       border-radius: 4px;
-      margin-bottom: 10px;
-      overflow: auto;
+      margin-bottom: 1rem;
       background-color: #fff;
+      overflow: auto;
     }
 
     .summary-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9em;
+      font-size: 0.9rem;
     }
+
     .summary-table th,
     .summary-table td {
       text-align: left;
-      padding: 4px 6px;
+      padding: 0.5rem 0.75rem;
       border-bottom: 1px solid #eee;
     }
     .summary-table th {
@@ -84,170 +99,131 @@
     .summary-row {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 1em;
-    }
-    .summary-row span {
-      font-weight: bold;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
     }
 
-    /* Eingabe für Bargeld */
+    /* Eingabe Bargeld + Fehlbetrag */
     .cash-input {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-    .cash-input label {
-      white-space: nowrap;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
     .cash-input input {
-      width: 100px;
-      font-size: 1em;
-      padding: 4px;
+      width: 6rem;
+      padding: 0.3rem;
+      font-size: 1rem;
     }
-
-    /* Rückgeld / Fehlbetrag */
     .change-display {
-      margin-bottom: 8px;
+      margin-bottom: 0.75rem;
       font-weight: bold;
     }
 
     /* Reset-Button */
     .reset-all-btn {
-      padding: 10px 15px;
+      padding: 0.75rem;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #eee;
-      margin-top: 8px;
       width: 100%;
-      font-size: 1em;
-    }
-
-    /* Titel */
-    h1 {
-      margin-bottom: 1em;
-    }
-
-    /*
-      Responsive Kachel-Grid:
-      - Passt sich an verfügbare Breite an.
-      - minmax(150px, 1fr) -> jedes "Kachel-Feld" mindestens 150px breit,
-        bei viel Platz können mehrere Kacheln nebeneinander erscheinen.
-    */
-    .drink-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 10px;
+      font-size: 1rem;
     }
 
     /* 
-      Kacheln:
-      - Weniger Padding, damit sie nicht zu hoch sind.
-      - Breiter Rahmen (3px).
-      - Buttons größer dank clamp(), um flexibel mit Displaygröße umzugehen.
+      KACHELN
+      - Padding in rem, Buttons in rem => skalieren mit Fontgröße.
     */
     .drink-tile {
       position: relative;
       border-radius: 6px;
-      padding: 6px;
+      padding: 0.75rem;
       text-align: center;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-      border: 3px solid #ccc; /* breiterer Rahmen */
+      border: 3px solid #ccc; /* breiter Rahmen */
       background-color: transparent;
     }
 
     .drink-tile h2 {
       margin: 0.3em 0;
-      font-size: 1em;
+      font-size: 1rem;
     }
 
-    /* Bild noch etwas kleiner, damit Höhe reduziert bleibt */
     .drink-tile img {
       max-width: 60px;
       height: auto;
       display: block;
-      margin: 0 auto 4px auto;
+      margin: 0.25rem auto;
     }
 
-    /* Preis & Menge */
     .quantity-display {
-      font-size: 1.1em;
+      font-size: 1.1rem;
       font-weight: bold;
-      margin: 0.3em 0;
+      margin: 0.25rem 0;
     }
 
-    /*
-      Größere Buttons:
-      - font-size über clamp() -> z.B. Mindestens 1rem, 
-        bei sehr großen Displays bis 1.4rem,
-        und "auto" skaliert dazwischen.
-    */
+    /* Buttons größer, touchfreundlich */
     .quantity-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      margin-top: 4px;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
     }
     .quantity-controls button {
-      font-size: clamp(1rem, 2vw, 1.4rem);
-      padding: 0.5em 0.8em;
+      font-size: 1rem;
+      padding: 0.75rem 1rem;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
     }
 
-    /* Add-on-Kacheln mit anderer Rahmenfarbe (2px dashed) */
+    /* Add-on-Kacheln (anderer Rahmen, etc.) */
     .addons-container {
-      margin-top: 4px;
+      margin-top: 0.5rem;
       border-top: 1px solid #bbb;
-      padding-top: 4px;
+      padding-top: 0.5rem;
     }
     .addon-tile {
       display: inline-block;
-      border: 2px dashed #555; /* anderer Stil/Farbe als Hauptkachel */
+      border: 2px dashed #555;
       border-radius: 6px;
-      padding: 4px;
-      margin: 3px;
+      padding: 0.5rem;
+      margin: 0.3rem;
       text-align: center;
       cursor: pointer;
       transition: background-color 0.3s;
       background-color: transparent;
     }
     .addon-tile h3 {
-      font-size: 0.85em;
-      margin: 0 0 2px 0;
+      font-size: 0.85rem;
+      margin: 0 0 0.3rem 0;
     }
     .addon-tile p {
       margin: 0;
-      font-size: 0.8em;
+      font-size: 0.8rem;
     }
-    .addon-tile:hover {
-      background-color: #eaeaea;
-    }
-
     .addon-controls {
       display: flex;
-      gap: 4px;
-      margin-top: 4px;
+      gap: 0.3rem;
+      margin-top: 0.3rem;
       justify-content: center;
     }
     .addon-controls button {
-      font-size: clamp(0.9rem, 2vw, 1.2rem);
-      padding: 0.4em 0.6em;
-      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.5rem 0.75rem;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
+      cursor: pointer;
     }
 
-    /* Bei Menge > 0 => kräftigerer Schatten, gefüllte Hintergrundfarbe */
+    /* Wenn ein Artikel aktiv (quantity>0), Schatten verstärken */
     .drink-tile.active {
       box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
     }
@@ -256,22 +232,22 @@
 <body>
 
 <div class="main-content" id="mainContent">
-  <h1>Responsive Kacheln mit großen Touch-Buttons</h1>
-  <div class="drink-container" id="drinkContainer"></div>
+  <h1>Responsives Grid mit dynamischer Kachelbreite</h1>
+  <div class="drink-container" id="drinkContainer">
+    <!-- Kacheln werden per JS erzeugt -->
+  </div>
 </div>
 
 <div class="summary" id="summarySection">
   <h2>Übersicht</h2>
-
-  <!-- Bestell-Liste (Tabelle) -->
+  
   <div class="summary-items" id="summaryList"></div>
-
+  
   <div class="summary-row">
     <div>Summe:</div>
     <div><span id="grandTotal">0,00 €</span></div>
   </div>
 
-  <!-- Eingabe: Bargeld -->
   <div class="cash-input">
     <label for="cashGiven">Betrag gegeben:</label>
     <input 
@@ -283,44 +259,42 @@
     />
   </div>
 
-  <!-- Rückgeld / Fehlbetrag -->
   <div class="change-display" id="changeDisplay"></div>
 
-  <!-- Reset-Button -->
   <button class="reset-all-btn" id="resetAllButton">Gesamte Bestellung auf 0</button>
 </div>
 
 <script>
-/*
-  Artikel mit Farb-Attribut (color).
-  Rückgabe-Artikel haben negative Preise.
-  -> Das Grid ordnet die Kacheln je nach Bildschirmbreite an.
+/* 
+  Beispiel-Daten: 
+  Alle Kacheln + Add-ons, teils positive (Kauf), teils negative (Rückgabe). 
+  Jede Kachel hat eine Farbe (color), Menge usw. (wie zuvor).
 */
 let drinks = [
-  { 
-    name: "Glühwein Weiß", 
-    price: 4.00, 
-    quantity: 0, 
-    color: "#FFC8C8", 
+  {
+    name: "Glühwein Weiß",
+    price: 4.00,
+    quantity: 0,
+    color: "#FFC8C8",
     imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
     addOns: [
       { name: "Schuss", price: 1.00, quantity: 0 }
     ]
   },
-  { 
-    name: "Glühwein Rot", 
-    price: 4.00, 
-    quantity: 0, 
-    color: "#C8FFC8", 
+  {
+    name: "Glühwein Rot",
+    price: 4.00,
+    quantity: 0,
+    color: "#C8FFC8",
     imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
     addOns: [
       { name: "Schuss", price: 1.00, quantity: 0 }
     ]
   },
-  { 
-    name: "Kakao", 
-    price: 3.00, 
-    quantity: 0, 
+  {
+    name: "Kakao",
+    price: 3.00,
+    quantity: 0,
     color: "#C8C8FF",
     imgUrl: "https://media.istockphoto.com/id/1819859138/de/vektor/set-aus-tassen-hei%C3%9Fer-schokolade-mit-marshmallows-vektor-illustration.jpg?s=612x612&w=0&k=20&c=M1Y0tEqin_awGm_XX-O59JPmdhPBY8hwNb_aaOxf1pM=",
     addOns: [
@@ -328,117 +302,117 @@ let drinks = [
       { name: "Sahne",  price: 0.50, quantity: 0 }
     ]
   },
-  { 
-    name: "Glühwein Weiß Kanne", 
-    price: 15.00, 
-    quantity: 0, 
-    color: "#FFE8C8", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
+  {
+    name: "Glühwein Weiß Kanne",
+    price: 15.00,
+    quantity: 0,
+    color: "#FFE8C8",
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
     addOns: []
   },
-  { 
-    name: "Glühwein Rot Kanne", 
-    price: 15.00, 
-    quantity: 0, 
-    color: "#C8FFE8", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
+  {
+    name: "Glühwein Rot Kanne",
+    price: 15.00,
+    quantity: 0,
+    color: "#C8FFE8",
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
     addOns: []
   },
-  { 
-    name: "Kakao Kanne",    
-    price: 12.00, 
-    quantity: 0, 
-    color: "#E8C8FF", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
+  {
+    name: "Kakao Kanne",
+    price: 12.00,
+    quantity: 0,
+    color: "#E8C8FF",
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
     addOns: []
   },
-
-  { 
-    name: "Pils",            
-    price: 3.00, 
-    quantity: 0, 
-    color: "#FFC8E8", 
-    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", 
+  {
+    name: "Pils",
+    price: 3.00,
+    quantity: 0,
+    color: "#FFC8E8",
+    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s",
     addOns: []
   },
-  { 
-    name: "Kölsch",          
-    price: 3.00, 
-    quantity: 0, 
-    color: "#E8FFC8", 
-    imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", 
+  {
+    name: "Kölsch",
+    price: 3.00,
+    quantity: 0,
+    color: "#E8FFC8",
+    imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg",
     addOns: []
   },
-  { 
-    name: "Wasser",          
-    price: 2.00, 
-    quantity: 0, 
-    color: "#C8E8FF", 
-    imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg", 
+  {
+    name: "Wasser",
+    price: 2.00,
+    quantity: 0,
+    color: "#C8E8FF",
+    imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg",
     addOns: []
   },
-  { 
-    name: "Cola",            
-    price: 2.50, 
-    quantity: 0, 
+  {
+    name: "Cola",
+    price: 2.50,
+    quantity: 0,
     color: "#FFD8C8",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", 
+    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png",
     addOns: []
   },
-  { 
-    name: "Limo",            
-    price: 2.50, 
-    quantity: 0, 
-    color: "#F8C8FF", 
-    imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", 
+  {
+    name: "Limo",
+    price: 2.50,
+    quantity: 0,
+    color: "#F8C8FF",
+    imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg",
     addOns: []
   },
-  { 
-    name: "Sprite",          
-    price: 2.50, 
-    quantity: 0, 
+  {
+    name: "Sprite",
+    price: 2.50,
+    quantity: 0,
     color: "#C8F8FF",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", 
+    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg",
     addOns: []
   },
-  { 
-    name: "Apfelschorle",    
-    price: 2.50, 
-    quantity: 0, 
+  {
+    name: "Apfelschorle",
+    price: 2.50,
+    quantity: 0,
     color: "#FEE7C8",
-    imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", 
+    imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg",
     addOns: []
   },
 
-  /* Rückgaben (negative Preise) */
-  { 
+  // Rückgaben (negative Preise)
+  {
     name: "Rückgabe Tasse",
-    price: -2.00, 
-    quantity: 0, 
-    color: "#FEC8EC", 
-    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", 
+    price: -2.00,
+    quantity: 0,
+    color: "#FEC8EC",
+    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg",
     addOns: []
   },
-  { 
-    name: "Rückgabe Kanne", 
-    price: -10.00, 
-    quantity: 0, 
+  {
+    name: "Rückgabe Kanne",
+    price: -10.00,
+    quantity: 0,
     color: "#C8FEF0",
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
     addOns: []
   },
-  { 
-    name: "Rückgabe Flasche", 
-    price: -1.00, 
-    quantity: 0, 
+  {
+    name: "Rückgabe Flasche",
+    price: -1.00,
+    quantity: 0,
     color: "#FEFEC8",
-    imgUrl: "https://via.placeholder.com/100?text=R-Flasche", 
+    imgUrl: "https://via.placeholder.com/100?text=R-Flasche",
     addOns: []
   }
 ];
 
-let preparedStates = {}; // Häkchenzustand
+let preparedStates = {}; // Häkchenzustände: ob Artikel schon fertig
 
+// DOM-Referenzen
 const mainContent     = document.getElementById('mainContent');
 const drinkContainer  = document.getElementById('drinkContainer');
 const summarySection  = document.getElementById('summarySection');
@@ -471,16 +445,17 @@ function initializeTiles() {
     const priceInfo = document.createElement('p');
     tile.appendChild(priceInfo);
 
-    // Menge (fett, größer)
+    // Menge
     const quantityInfo = document.createElement('p');
     quantityInfo.classList.add('quantity-display');
     tile.appendChild(quantityInfo);
 
-    // Steuer-Buttons (Menge)
+    // Steuerelemente
     const controls = document.createElement('div');
     controls.classList.add('quantity-controls');
     tile.appendChild(controls);
 
+    // Minus
     const minusBtn = document.createElement('button');
     minusBtn.textContent = "-1";
     minusBtn.addEventListener('click', (e) => {
@@ -492,6 +467,7 @@ function initializeTiles() {
     });
     controls.appendChild(minusBtn);
 
+    // +5
     const plus5Btn = document.createElement('button');
     plus5Btn.textContent = "+5";
     plus5Btn.addEventListener('click', (e) => {
@@ -501,19 +477,18 @@ function initializeTiles() {
     });
     controls.appendChild(plus5Btn);
 
+    // 0
     const zeroBtn = document.createElement('button');
     zeroBtn.textContent = "0";
     zeroBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       drink.quantity = 0;
-      if (drink.addOns) {
-        drink.addOns.forEach(a => a.quantity = 0);
-      }
+      drink.addOns.forEach(a => a.quantity = 0);
       updateView();
     });
     controls.appendChild(zeroBtn);
 
-    // Klick auf die Kachel => +1
+    // Klick auf die gesamte Kachel => +1
     tile.addEventListener('click', () => {
       drink.quantity++;
       updateView();
@@ -530,6 +505,7 @@ function initializeTiles() {
         const addonTile = document.createElement('div');
         addonTile.classList.add('addon-tile');
 
+        // Klick => +1
         addonTile.addEventListener('click', (e) => {
           e.stopPropagation();
           addon.quantity++;
@@ -545,7 +521,7 @@ function initializeTiles() {
         const addonQuantity = document.createElement('p');
         addonTile.appendChild(addonQuantity);
 
-        // Add-on Steuerung
+        // Addon-Steuerung
         const addonControls = document.createElement('div');
         addonControls.classList.add('addon-controls');
         addonTile.appendChild(addonControls);
@@ -609,7 +585,7 @@ function updateView() {
   tileElements.forEach(el => {
     const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
 
-    // Preis-Text
+    // Preis
     if (drink.price < 0) {
       priceInfo.textContent = drink.price.toFixed(2).replace('.', ',') + " € (Rückgabe)";
     } else {
@@ -619,7 +595,7 @@ function updateView() {
     // Menge
     quantityInfo.textContent = "Menge: " + drink.quantity;
 
-    // Farbliche Anpassung:
+    // Farbe
     tile.style.borderColor = drink.color;
     if (drink.quantity > 0) {
       tile.classList.add('active');
@@ -640,6 +616,7 @@ function updateView() {
       }
       addonQuantity.textContent = "x " + addon.quantity;
 
+      // Eigenes Farbschema, aber wir übernehmen dieselbe Farbe
       addonTile.style.borderColor = "#555";
       if (addon.quantity > 0) {
         addonTile.style.backgroundColor = drink.color;
@@ -649,11 +626,11 @@ function updateView() {
     });
   });
 
-  // Zusammenfassung
+  // Tabelle + Rückgeld
   updateSummary();
 }
 
-/* Zusammenfassung (Tabelle) */
+/* Zusammenfassung und Tabelle */
 function updateSummary() {
   let rows = [];
   let total = 0;
@@ -702,7 +679,7 @@ function updateSummary() {
   adjustLayout();
 }
 
-/* Tabelle mit Checkbox-Spalte */
+/* Tabelle generieren */
 function buildSummaryList(rows) {
   if (rows.length === 0) {
     summaryListEl.innerHTML = "<p>Keine Artikel ausgewählt.</p>";
@@ -728,15 +705,13 @@ function buildSummaryList(rows) {
       ? r.price.toFixed(2).replace('.', ',') + " €"
       : "–";
     let totalPrice = r.total.toFixed(2).replace('.', ',') + " €";
+
     let isChecked = preparedStates[r.rowID] === true ? "checked" : "";
 
     html += `
-      <tr 
-        data-rowid="${r.rowID}"
-        style="background-color: ${r.color};"
-      >
+      <tr data-rowid="${r.rowID}" style="background-color: ${r.color};">
         <td>
-          <input
+          <input 
             type="checkbox"
             data-rowid="${r.rowID}"
             ${isChecked}
@@ -763,7 +738,7 @@ function buildSummaryList(rows) {
   });
 }
 
-/* Bargeld-Eingabe => Rückgeld/Fehlbetrag */
+/* Bargeld-Eingabe => Rückgeld oder Fehlbetrag */
 function calculateChange(total) {
   let cash = parseFloat(cashGivenInput.value);
   if (isNaN(cash)) {
@@ -778,22 +753,20 @@ function calculateChange(total) {
   }
 }
 
-/* Dynamischer Abstand für Hauptbereich */
+/* Dynamischer Platz für Zusammenfassung */
 function adjustLayout() {
   const summaryHeight = summarySection.offsetHeight;
   mainContent.style.paddingBottom = (summaryHeight + 10) + "px";
 }
 
-/* Alles zurücksetzen */
+/* Reset */
 function resetAll() {
   drinks.forEach(drink => {
     drink.quantity = 0;
-    if (drink.addOns) {
-      drink.addOns.forEach(a => a.quantity = 0);
-    }
+    drink.addOns.forEach(a => a.quantity = 0);
   });
-  cashGivenInput.value = "";
   preparedStates = {};
+  cashGivenInput.value = "";
   updateView();
 }
 
@@ -802,18 +775,16 @@ window.addEventListener('load', () => {
   initializeTiles();
   updateView();
 });
-
 resetAllBtn.addEventListener('click', resetAll);
 
+/* Wenn Bargeld-Eingabe ändert -> neu berechnen */
 cashGivenInput.addEventListener('input', () => {
   let total = 0;
   drinks.forEach(d => {
     total += d.quantity * d.price;
-    if (d.addOns) {
-      d.addOns.forEach(a => {
-        total += a.quantity * a.price;
-      });
-    }
+    d.addOns.forEach(a => {
+      total += a.quantity * a.price;
+    });
   });
   calculateChange(total);
 });
