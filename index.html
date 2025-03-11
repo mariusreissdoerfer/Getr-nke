@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Farbcodierte Kacheln - Design-Update</title>
+  <title>Responsive Kacheln mit großen Touch-Buttons</title>
   <style>
     /* 
       1) Allgemeiner Seitenhintergrund in einem diffuseren Grau.
@@ -21,10 +21,11 @@
 
     /* Haupt-Container für die Kacheln */
     .main-content {
-      /* Abstand nach unten wird per JS erhöht, damit die fixierte Zusammenfassung nichts verdeckt. */
       margin: 0 auto;
       max-width: 900px;
       padding: 10px 20px;
+      /* Der Abstand nach unten wird dynamisch per JS erhöht,
+         damit die fixierte Zusammenfassung nicht überdeckt. */
     }
 
     /* Zusammenfassung fixiert am Seitenende */
@@ -76,7 +77,7 @@
     .summary-table th {
       background: #f7f7f7;
       position: sticky;
-      top: 0; /* bleibt sichtbar beim Scrollen im Div */
+      top: 0;
       z-index: 1;
     }
 
@@ -129,23 +130,28 @@
       margin-bottom: 1em;
     }
 
-    /* Kachel-Grid */
+    /*
+      Responsive Kachel-Grid:
+      - Passt sich an verfügbare Breite an.
+      - minmax(150px, 1fr) -> jedes "Kachel-Feld" mindestens 150px breit,
+        bei viel Platz können mehrere Kacheln nebeneinander erscheinen.
+    */
     .drink-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
       gap: 10px;
     }
 
     /* 
       Kacheln:
-      - Weniger Padding, damit sie nicht so hoch werden.
-      - Größerer Rahmen (3px).
-      - Buttons insgesamt größer.
+      - Weniger Padding, damit sie nicht zu hoch sind.
+      - Breiter Rahmen (3px).
+      - Buttons größer dank clamp(), um flexibel mit Displaygröße umzugehen.
     */
     .drink-tile {
       position: relative;
       border-radius: 6px;
-      padding: 6px; /* verringerter Padding */
+      padding: 6px;
       text-align: center;
       cursor: pointer;
       user-select: none;
@@ -156,11 +162,11 @@
     }
 
     .drink-tile h2 {
-      margin: 0.3em 0; /* weniger Abstand */
-      font-size: 1em;  /* leicht verkleinert */
+      margin: 0.3em 0;
+      font-size: 1em;
     }
 
-    /* Bild etwas kleiner */
+    /* Bild noch etwas kleiner, damit Höhe reduziert bleibt */
     .drink-tile img {
       max-width: 60px;
       height: auto;
@@ -175,6 +181,12 @@
       margin: 0.3em 0;
     }
 
+    /*
+      Größere Buttons:
+      - font-size über clamp() -> z.B. Mindestens 1rem, 
+        bei sehr großen Displays bis 1.4rem,
+        und "auto" skaliert dazwischen.
+    */
     .quantity-controls {
       display: flex;
       align-items: center;
@@ -182,23 +194,21 @@
       gap: 6px;
       margin-top: 4px;
     }
-    /* Größere Buttons, touchfreundlich */
     .quantity-controls button {
-      font-size: 1.1em;
-      padding: 8px 12px;
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      padding: 0.5em 0.8em;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
     }
 
-    /* Add-on-Kacheln mit anderer Rahmenfarbe */
+    /* Add-on-Kacheln mit anderer Rahmenfarbe (2px dashed) */
     .addons-container {
-      margin-top: 4px; /* reduziert */
+      margin-top: 4px;
       border-top: 1px solid #bbb;
-      padding-top: 4px; /* reduziert */
+      padding-top: 4px;
     }
-
     .addon-tile {
       display: inline-block;
       border: 2px dashed #555; /* anderer Stil/Farbe als Hauptkachel */
@@ -218,7 +228,6 @@
       margin: 0;
       font-size: 0.8em;
     }
-
     .addon-tile:hover {
       background-color: #eaeaea;
     }
@@ -230,15 +239,15 @@
       justify-content: center;
     }
     .addon-controls button {
-      font-size: 1em;
-      padding: 6px 8px;
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      padding: 0.4em 0.6em;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
     }
 
-    /* .active => etwas kräftigerer Schatten, wenn Menge > 0 */
+    /* Bei Menge > 0 => kräftigerer Schatten, gefüllte Hintergrundfarbe */
     .drink-tile.active {
       box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
     }
@@ -247,7 +256,7 @@
 <body>
 
 <div class="main-content" id="mainContent">
-  <h1>Farbcodierte Kacheln - Design-Update</h1>
+  <h1>Responsive Kacheln mit großen Touch-Buttons</h1>
   <div class="drink-container" id="drinkContainer"></div>
 </div>
 
@@ -285,6 +294,7 @@
 /*
   Artikel mit Farb-Attribut (color).
   Rückgabe-Artikel haben negative Preise.
+  -> Das Grid ordnet die Kacheln je nach Bildschirmbreite an.
 */
 let drinks = [
   { 
@@ -427,7 +437,7 @@ let drinks = [
   }
 ];
 
-let preparedStates = {}; // Häkchenzustand: Zeilen "bereit"
+let preparedStates = {}; // Häkchenzustand
 
 const mainContent     = document.getElementById('mainContent');
 const drinkContainer  = document.getElementById('drinkContainer');
@@ -466,7 +476,7 @@ function initializeTiles() {
     quantityInfo.classList.add('quantity-display');
     tile.appendChild(quantityInfo);
 
-    // Steuer-Buttons
+    // Steuer-Buttons (Menge)
     const controls = document.createElement('div');
     controls.classList.add('quantity-controls');
     tile.appendChild(controls);
@@ -503,6 +513,7 @@ function initializeTiles() {
     });
     controls.appendChild(zeroBtn);
 
+    // Klick auf die Kachel => +1
     tile.addEventListener('click', () => {
       drink.quantity++;
       updateView();
@@ -595,7 +606,6 @@ function initializeTiles() {
 
 /* Inhalte aktualisieren */
 function updateView() {
-  // Kachel-Inhalte
   tileElements.forEach(el => {
     const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
 
@@ -623,7 +633,6 @@ function updateView() {
     addonElements.forEach(ae => {
       const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
       addonTitle.textContent = addon.name;
-
       if (addon.price < 0) {
         addonPrice.textContent = addon.price.toFixed(2).replace('.', ',') + " € (Rück)";
       } else {
@@ -631,8 +640,7 @@ function updateView() {
       }
       addonQuantity.textContent = "x " + addon.quantity;
 
-      // Anderer Rahmen, aber dieselbe "Hintergrund"-Logik bei Menge > 0
-      addonTile.style.borderColor = "#555"; /* abweichende Farbe */
+      addonTile.style.borderColor = "#555";
       if (addon.quantity > 0) {
         addonTile.style.backgroundColor = drink.color;
       } else {
@@ -641,7 +649,7 @@ function updateView() {
     });
   });
 
-  // Zusammenfassung neu aufbauen
+  // Zusammenfassung
   updateSummary();
 }
 
@@ -694,7 +702,7 @@ function updateSummary() {
   adjustLayout();
 }
 
-/* Tabelle mit Checkboxen */
+/* Tabelle mit Checkbox-Spalte */
 function buildSummaryList(rows) {
   if (rows.length === 0) {
     summaryListEl.innerHTML = "<p>Keine Artikel ausgewählt.</p>";
@@ -720,7 +728,6 @@ function buildSummaryList(rows) {
       ? r.price.toFixed(2).replace('.', ',') + " €"
       : "–";
     let totalPrice = r.total.toFixed(2).replace('.', ',') + " €";
-
     let isChecked = preparedStates[r.rowID] === true ? "checked" : "";
 
     html += `
