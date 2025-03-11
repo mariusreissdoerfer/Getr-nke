@@ -2,9 +2,12 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Farbcodierte Kacheln mit Häkchen in der Bestelltabelle</title>
+  <title>Farbcodierte Kacheln - Design-Update</title>
   <style>
-    /* Grundlegendes Reset/Box-Sizing */
+    /* 
+      1) Allgemeiner Seitenhintergrund in einem diffuseren Grau.
+      2) Box-Sizing für zuverlässige Layout-Kontrolle.
+    */
     * {
       box-sizing: border-box;
     }
@@ -13,12 +16,12 @@
       padding: 0;
       font-family: sans-serif;
       height: 100%;
+      background-color: #f2f2f2; /* weicher Grauton */
     }
 
     /* Haupt-Container für die Kacheln */
     .main-content {
-      /* Der untere Randabstand wird per JS dynamisch gesetzt,
-         damit die fixierte Zusammenfassung nichts überdeckt. */
+      /* Abstand nach unten wird per JS erhöht, damit die fixierte Zusammenfassung nichts verdeckt. */
       margin: 0 auto;
       max-width: 900px;
       padding: 10px 20px;
@@ -36,7 +39,7 @@
       border-top: 1px solid #ccc;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
 
-      /* Maximale Höhe, damit sie nicht den ganzen Bildschirm überfällt */
+      /* Maximale Höhe, damit sie nicht den gesamten Bildschirm überdeckt */
       max-height: 50vh;
       overflow-y: auto;
 
@@ -50,12 +53,13 @@
       margin-bottom: 8px;
     }
 
-    /* Container für die Tabelle */
+    /* Tabelle in der Zusammenfassung */
     .summary-items {
       border: 1px solid #ddd;
       border-radius: 4px;
       margin-bottom: 10px;
       overflow: auto;
+      background-color: #fff;
     }
 
     .summary-table {
@@ -71,12 +75,11 @@
     }
     .summary-table th {
       background: #f7f7f7;
-      position: sticky; /* bleibt oben beim Scrollen innerhalb der Tabelle */
-      top: 0;
+      position: sticky;
+      top: 0; /* bleibt sichtbar beim Scrollen im Div */
       z-index: 1;
     }
 
-    /* Summen-Zeile */
     .summary-row {
       display: flex;
       justify-content: space-between;
@@ -103,20 +106,20 @@
       padding: 4px;
     }
 
-    /* Rückgeld/Fehlbetrag-Anzeige */
+    /* Rückgeld / Fehlbetrag */
     .change-display {
       margin-bottom: 8px;
       font-weight: bold;
     }
 
-    /* Reset-Button ganz unten */
+    /* Reset-Button */
     .reset-all-btn {
       padding: 10px 15px;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #eee;
-      margin-top: 8px; /* kleiner Abstand */
+      margin-top: 8px;
       width: 100%;
       font-size: 1em;
     }
@@ -129,40 +132,45 @@
     /* Kachel-Grid */
     .drink-container {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 10px;
     }
 
-    /* Einzelne Kachel */
+    /* 
+      Kacheln:
+      - Weniger Padding, damit sie nicht so hoch werden.
+      - Größerer Rahmen (3px).
+      - Buttons insgesamt größer.
+    */
     .drink-tile {
       position: relative;
       border-radius: 6px;
-      padding: 8px;
+      padding: 6px; /* verringerter Padding */
       text-align: center;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-
-      /* Anfangs hat jede Kachel einen grauen Rahmen,
-         wird aber per JS auf "border-color" = item.color gesetzt */
-      border: 2px solid #ccc;
+      border: 3px solid #ccc; /* breiterer Rahmen */
+      background-color: transparent;
     }
 
     .drink-tile h2 {
-      margin: 0.5em 0;
-      font-size: 1.1em;
-    }
-    .drink-tile img {
-      max-width: 80px;
-      height: auto;
-      display: block;
-      margin: 0 auto 8px auto;
+      margin: 0.3em 0; /* weniger Abstand */
+      font-size: 1em;  /* leicht verkleinert */
     }
 
-    /* Menge größer/fett */
+    /* Bild etwas kleiner */
+    .drink-tile img {
+      max-width: 60px;
+      height: auto;
+      display: block;
+      margin: 0 auto 4px auto;
+    }
+
+    /* Preis & Menge */
     .quantity-display {
-      font-size: 1.2em;
+      font-size: 1.1em;
       font-weight: bold;
       margin: 0.3em 0;
     }
@@ -172,43 +180,49 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      margin-top: 6px;
+      margin-top: 4px;
     }
+    /* Größere Buttons, touchfreundlich */
     .quantity-controls button {
-      padding: 6px 10px;
+      font-size: 1.1em;
+      padding: 8px 12px;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
     }
 
-    /* Add-on-Kacheln innerhalb einer Getränkekachel */
+    /* Add-on-Kacheln mit anderer Rahmenfarbe */
     .addons-container {
-      margin-top: 8px;
-      border-top: 1px solid #ccc;
-      padding-top: 8px;
+      margin-top: 4px; /* reduziert */
+      border-top: 1px solid #bbb;
+      padding-top: 4px; /* reduziert */
     }
+
     .addon-tile {
       display: inline-block;
-      border: 1px solid #ddd;
+      border: 2px dashed #555; /* anderer Stil/Farbe als Hauptkachel */
       border-radius: 6px;
-      padding: 6px;
-      margin: 4px;
+      padding: 4px;
+      margin: 3px;
       text-align: center;
       cursor: pointer;
       transition: background-color 0.3s;
+      background-color: transparent;
     }
     .addon-tile h3 {
-      font-size: 0.95em;
-      margin: 0 0 4px 0;
+      font-size: 0.85em;
+      margin: 0 0 2px 0;
     }
     .addon-tile p {
       margin: 0;
-      font-size: 0.85em;
+      font-size: 0.8em;
     }
+
     .addon-tile:hover {
-      background-color: #f0f0f0;
+      background-color: #eaeaea;
     }
+
     .addon-controls {
       display: flex;
       gap: 4px;
@@ -216,15 +230,15 @@
       justify-content: center;
     }
     .addon-controls button {
-      padding: 3px 6px;
+      font-size: 1em;
+      padding: 6px 8px;
       cursor: pointer;
       border-radius: 4px;
       border: 1px solid #777;
       background: #f5f5f5;
-      font-size: 0.8em;
     }
 
-    /* .active => etwas mehr Schatten, wenn Menge > 0 */
+    /* .active => etwas kräftigerer Schatten, wenn Menge > 0 */
     .drink-tile.active {
       box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
     }
@@ -233,7 +247,7 @@
 <body>
 
 <div class="main-content" id="mainContent">
-  <h1>SChleede Nikolausmarkt</h1>
+  <h1>Farbcodierte Kacheln - Design-Update</h1>
   <div class="drink-container" id="drinkContainer"></div>
 </div>
 
@@ -243,7 +257,6 @@
   <!-- Bestell-Liste (Tabelle) -->
   <div class="summary-items" id="summaryList"></div>
 
-  <!-- Summen-Zeile -->
   <div class="summary-row">
     <div>Summe:</div>
     <div><span id="grandTotal">0,00 €</span></div>
@@ -270,8 +283,8 @@
 
 <script>
 /*
-  Hier haben wir eine Reihe von Artikeln, teils positiv (Kauf), teils negativ (Rückgabe).
-  Jeder Artikel hat eine EIGENE Farbe (z.B. color: "#FFC8C8").
+  Artikel mit Farb-Attribut (color).
+  Rückgabe-Artikel haben negative Preise.
 */
 let drinks = [
   { 
@@ -387,7 +400,7 @@ let drinks = [
     addOns: []
   },
 
-  // Rückgaben (NEGATIVE Preise)
+  /* Rückgaben (negative Preise) */
   { 
     name: "Rückgabe Tasse",
     price: -2.00, 
@@ -414,9 +427,7 @@ let drinks = [
   }
 ];
 
-// Hier merken wir uns, welche Tabelle-Positionen „abgehakt“ wurden.
-// Key: "main-Artikelname" oder "addon-Artikelname::Addonname"
-let preparedStates = {};
+let preparedStates = {}; // Häkchenzustand: Zeilen "bereit"
 
 const mainContent     = document.getElementById('mainContent');
 const drinkContainer  = document.getElementById('drinkContainer');
@@ -429,11 +440,9 @@ const changeDisplayEl = document.getElementById('changeDisplay');
 
 let tileElements = [];
 
-/* -----------------------------
-   KACHELN EINMALIG ERZEUGEN
------------------------------ */
+/* Kacheln einmalig erzeugen */
 function initializeTiles() {
-  drinks.forEach((drink, index) => {
+  drinks.forEach((drink) => {
     const tile = document.createElement('div');
     tile.classList.add('drink-tile');
 
@@ -448,11 +457,11 @@ function initializeTiles() {
     title.textContent = drink.name;
     tile.appendChild(title);
 
-    // Preis (positiv/negativ)
+    // Preis
     const priceInfo = document.createElement('p');
     tile.appendChild(priceInfo);
 
-    // Menge (in größer/fett)
+    // Menge (fett, größer)
     const quantityInfo = document.createElement('p');
     quantityInfo.classList.add('quantity-display');
     tile.appendChild(quantityInfo);
@@ -462,7 +471,6 @@ function initializeTiles() {
     controls.classList.add('quantity-controls');
     tile.appendChild(controls);
 
-    // Minus-Button
     const minusBtn = document.createElement('button');
     minusBtn.textContent = "-1";
     minusBtn.addEventListener('click', (e) => {
@@ -474,7 +482,6 @@ function initializeTiles() {
     });
     controls.appendChild(minusBtn);
 
-    // +5-Button
     const plus5Btn = document.createElement('button');
     plus5Btn.textContent = "+5";
     plus5Btn.addEventListener('click', (e) => {
@@ -484,13 +491,11 @@ function initializeTiles() {
     });
     controls.appendChild(plus5Btn);
 
-    // 0-Button
     const zeroBtn = document.createElement('button');
     zeroBtn.textContent = "0";
     zeroBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       drink.quantity = 0;
-      // Add-ons ebenfalls zurücksetzen
       if (drink.addOns) {
         drink.addOns.forEach(a => a.quantity = 0);
       }
@@ -498,7 +503,6 @@ function initializeTiles() {
     });
     controls.appendChild(zeroBtn);
 
-    // Klick auf die Kachel => +1
     tile.addEventListener('click', () => {
       drink.quantity++;
       updateView();
@@ -515,7 +519,6 @@ function initializeTiles() {
         const addonTile = document.createElement('div');
         addonTile.classList.add('addon-tile');
 
-        // Klick => +1
         addonTile.addEventListener('click', (e) => {
           e.stopPropagation();
           addon.quantity++;
@@ -531,7 +534,7 @@ function initializeTiles() {
         const addonQuantity = document.createElement('p');
         addonTile.appendChild(addonQuantity);
 
-        // Steuerung: -1, angleichen, 0
+        // Add-on Steuerung
         const addonControls = document.createElement('div');
         addonControls.classList.add('addon-controls');
         addonTile.appendChild(addonControls);
@@ -590,15 +593,13 @@ function initializeTiles() {
   });
 }
 
-/* -----------------------------
-   KACHELN UPDATEN
------------------------------ */
+/* Inhalte aktualisieren */
 function updateView() {
-  // Kacheldaten aktualisieren
+  // Kachel-Inhalte
   tileElements.forEach(el => {
     const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
 
-    // Preis
+    // Preis-Text
     if (drink.price < 0) {
       priceInfo.textContent = drink.price.toFixed(2).replace('.', ',') + " € (Rückgabe)";
     } else {
@@ -608,9 +609,7 @@ function updateView() {
     // Menge
     quantityInfo.textContent = "Menge: " + drink.quantity;
 
-    // Farbliche Anpassung an die Menge
-    // -> Ist quantity=0, nur ein farbiger Rahmen
-    // -> Ist quantity>0, voll gefüllt
+    // Farbliche Anpassung:
     tile.style.borderColor = drink.color;
     if (drink.quantity > 0) {
       tile.classList.add('active');
@@ -625,7 +624,6 @@ function updateView() {
       const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
       addonTitle.textContent = addon.name;
 
-      // Preis
       if (addon.price < 0) {
         addonPrice.textContent = addon.price.toFixed(2).replace('.', ',') + " € (Rück)";
       } else {
@@ -633,35 +631,29 @@ function updateView() {
       }
       addonQuantity.textContent = "x " + addon.quantity;
 
-      // Add-on-Kacheln im selben Farbkonzept
-      // - Wir unterscheiden hier nicht zwischen "0" und ">0" beim Add-on
-      //   Könntest du aber ähnlich machen wie beim Hauptgetränk.
-      addonTile.style.borderColor = drink.color;
+      // Anderer Rahmen, aber dieselbe "Hintergrund"-Logik bei Menge > 0
+      addonTile.style.borderColor = "#555"; /* abweichende Farbe */
       if (addon.quantity > 0) {
         addonTile.style.backgroundColor = drink.color;
       } else {
-        addonTile.style.backgroundColor = "";
+        addonTile.style.backgroundColor = "transparent";
       }
     });
   });
 
-  // Zusammenfassung + Rückgeld aktualisieren
+  // Zusammenfassung neu aufbauen
   updateSummary();
 }
 
-/* -----------------------------
-   ZUSAMMENFASSUNG (TABELLE)
------------------------------ */
+/* Zusammenfassung (Tabelle) */
 function updateSummary() {
   let rows = [];
   let total = 0;
 
   drinks.forEach(drink => {
-    // Hauptartikel
     let lineTotal = drink.quantity * drink.price;
     let addOnSum  = 0;
 
-    // Add-ons
     let addOnRows = [];
     if (drink.addOns) {
       drink.addOns.forEach(addon => {
@@ -673,15 +665,13 @@ function updateSummary() {
             quantity: addon.quantity,
             price: addon.price,
             total: addonLineTotal,
-            color: drink.color, // Gleiche Farbe wie der Hauptartikel
+            color: drink.color,
             rowID: "addon-" + drink.name + "::" + addon.name
           });
         }
       });
     }
 
-    // Wenn Hauptartikel selbst eine Menge != 0 hat
-    // oder die Add-ons > 0 sind, zeigen wir den Hauptartikel
     if (drink.quantity !== 0 || addOnSum !== 0) {
       rows.push({
         name: drink.name,
@@ -691,7 +681,6 @@ function updateSummary() {
         color: drink.color,
         rowID: "main-" + drink.name
       });
-      // Add-On-Zeilen anhängen
       rows.push(...addOnRows);
     }
 
@@ -700,18 +689,12 @@ function updateSummary() {
 
   buildSummaryList(rows);
 
-  // Gesamt
   grandTotalEl.textContent = total.toFixed(2).replace('.', ',') + " €";
-
-  // Bargeld-Eingabe => Rückgeld
   calculateChange(total);
-
-  // Layout anpassen, damit die Kacheln nicht verdeckt werden
   adjustLayout();
 }
 
-/* Erzeugt die HTML-Tabelle für die Zusammenfassung 
-   mit einer Extra-Spalte für das Häkchen. */
+/* Tabelle mit Checkboxen */
 function buildSummaryList(rows) {
   if (rows.length === 0) {
     summaryListEl.innerHTML = "<p>Keine Artikel ausgewählt.</p>";
@@ -738,7 +721,6 @@ function buildSummaryList(rows) {
       : "–";
     let totalPrice = r.total.toFixed(2).replace('.', ',') + " €";
 
-    // Haben wir diesen Eintrag schon abgehakt?
     let isChecked = preparedStates[r.rowID] === true ? "checked" : "";
 
     html += `
@@ -764,7 +746,7 @@ function buildSummaryList(rows) {
   html += `</tbody></table>`;
   summaryListEl.innerHTML = html;
 
-  // Event Listener für alle Checkboxen
+  // Checkbox-Listener
   const checkboxes = summaryListEl.querySelectorAll('input[type="checkbox"]');
   checkboxes.forEach(chk => {
     chk.addEventListener('change', (e) => {
@@ -774,7 +756,7 @@ function buildSummaryList(rows) {
   });
 }
 
-/* Bargeld = Kassen-Eingabe => Rückgeld oder Fehlbetrag */
+/* Bargeld-Eingabe => Rückgeld/Fehlbetrag */
 function calculateChange(total) {
   let cash = parseFloat(cashGivenInput.value);
   if (isNaN(cash)) {
@@ -789,8 +771,7 @@ function calculateChange(total) {
   }
 }
 
-/* Passt den unteren Randabstand des Kachelbereichs
-   an die aktuelle Höhe der Zusammenfassung an. */
+/* Dynamischer Abstand für Hauptbereich */
 function adjustLayout() {
   const summaryHeight = summarySection.offsetHeight;
   mainContent.style.paddingBottom = (summaryHeight + 10) + "px";
@@ -805,14 +786,11 @@ function resetAll() {
     }
   });
   cashGivenInput.value = "";
-  // Auch Häkchenzustand leeren
   preparedStates = {};
   updateView();
 }
 
-/* -------------------------
-   INIT
-------------------------- */
+/* Init */
 window.addEventListener('load', () => {
   initializeTiles();
   updateView();
@@ -820,7 +798,6 @@ window.addEventListener('load', () => {
 
 resetAllBtn.addEventListener('click', resetAll);
 
-// Bei Änderung der Bargeld-Eingabe -> neu berechnen
 cashGivenInput.addEventListener('input', () => {
   let total = 0;
   drinks.forEach(d => {
