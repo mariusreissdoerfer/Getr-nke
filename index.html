@@ -2,11 +2,11 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Farbcodierte Kacheln - Design-Update</title>
+  <title>Farbcodierte Kacheln - Ohne Überschrift</title>
   <style>
     /* 
-      1) Allgemeiner Seitenhintergrund in einem diffuseren Grau.
-      2) Box-Sizing für zuverlässige Layout-Kontrolle.
+      Allgemeiner Seitenhintergrund in einem diffuseren Grau.
+      Box-Sizing für zuverlässige Layout-Kontrolle.
     */
     * {
       box-sizing: border-box;
@@ -21,10 +21,11 @@
 
     /* Haupt-Container für die Kacheln */
     .main-content {
-      /* Abstand nach unten wird per JS erhöht, damit die fixierte Zusammenfassung nichts verdeckt. */
       margin: 0 auto;
-      max-width: 2000px;
+      max-width: 2000px; 
       padding: 10px 20px;
+      /* Der Abstand nach unten wird per JS gesetzt,
+         damit die fixierte Zusammenfassung nicht überlappt. */
     }
 
     /* Zusammenfassung fixiert am Seitenende */
@@ -39,21 +40,15 @@
       border-top: 1px solid #ccc;
       box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
 
-      /* Maximale Höhe, damit sie nicht den gesamten Bildschirm überdeckt */
-      max-height: 50vh;
+      /* Maximale Höhe, damit sie bei großen Tabellen nicht den ganzen Bildschirm überlagert */
+      max-height: 80vh;
       overflow-y: auto;
 
       /* Innenabstand */
       padding: 10px 20px;
     }
 
-    .summary h2 {
-      margin-top: 0;
-      font-size: 1.1em;
-      margin-bottom: 8px;
-    }
-
-    /* Tabelle in der Zusammenfassung */
+    /* Zusammenfassungstabelle */
     .summary-items {
       border: 1px solid #ddd;
       border-radius: 4px;
@@ -61,7 +56,6 @@
       overflow: auto;
       background-color: #fff;
     }
-
     .summary-table {
       width: 100%;
       border-collapse: collapse;
@@ -75,22 +69,24 @@
     }
     .summary-table th {
       background: #f7f7f7;
-      position: sticky;
-      top: 0; /* bleibt sichtbar beim Scrollen im Div */
+      position: sticky; /* bleibt beim Scrollen sichtbar */
+      top: 0;
       z-index: 1;
     }
 
+    /* Summenzeile (Summe in doppelter Schriftgröße) */
     .summary-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 6px;
       font-size: 1em;
     }
-    .summary-row span {
+    .summary-row #grandTotal {
+      font-size: 2em;   /* doppelte Schriftgröße */
       font-weight: bold;
     }
 
-    /* Eingabe für Bargeld */
+    /* Eingabefeld für Bargeld */
     .cash-input {
       display: flex;
       align-items: center;
@@ -106,10 +102,15 @@
       padding: 4px;
     }
 
-    /* Rückgeld / Fehlbetrag */
-    .change-display {
+    /* Das Rückgeld wird separat, rechtsbündig dargestellt */
+    .change-container {
+      display: flex;
+      justify-content: flex-end; /* rechtsbündig */
       margin-bottom: 8px;
+    }
+    .change-display {
       font-weight: bold;
+      font-size: 2em;
     }
 
     /* Reset-Button */
@@ -124,11 +125,6 @@
       font-size: 1em;
     }
 
-    /* Titel */
-    h1 {
-      margin-bottom: 1em;
-    }
-
     /* Kachel-Grid */
     .drink-container {
       display: grid;
@@ -136,33 +132,32 @@
       gap: 10px;
     }
 
-    /* 
+    /*
       Kacheln:
-      - Weniger Padding, damit sie nicht so hoch werden.
+      - Hintergrund standardmäßig weiß (nicht transparent).
       - Größerer Rahmen (3px).
-      - Buttons insgesamt größer.
+      - Buttons insgesamt größer (touchfreundlich).
     */
     .drink-tile {
       position: relative;
       border-radius: 6px;
-      padding: 6px; /* verringerter Padding */
+      padding: 6px; 
       text-align: center;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-      border: 3px solid #ccc; /* breiterer Rahmen */
-      background-color: transparent;
+      border: 3px solid #ccc;
+      background-color: #fff; /* Default weiß */
     }
 
     .drink-tile h2 {
-      margin: 0.3em 0; /* weniger Abstand */
-      font-size: 1em;  /* leicht verkleinert */
+      margin: 0.3em 0;
+      font-size: 1em;
     }
-
-    /* Bild etwas kleiner */
     .drink-tile img {
-      max-width: 60px;
+      max-width: 120px;
+      max-height: 80px;
       height: auto;
       display: block;
       margin: 0 auto 4px auto;
@@ -182,7 +177,6 @@
       gap: 6px;
       margin-top: 4px;
     }
-    /* Größere Buttons, touchfreundlich */
     .quantity-controls button {
       font-size: 1.1em;
       padding: 8px 12px;
@@ -192,23 +186,27 @@
       background: #f5f5f5;
     }
 
-    /* Add-on-Kacheln mit anderer Rahmenfarbe */
+    /* 
+      Add-on-Kacheln:
+      - Solider Rahmen (nicht gestrichelt).
+      - Andere Farbe bei Menge > 0 (z.B. ein helleres Grau), unabhängig vom Hauptgetränk.
+      (Kannst du natürlich beliebig anpassen.)
+    */
     .addons-container {
-      margin-top: 4px; /* reduziert */
+      margin-top: 4px; 
       border-top: 1px solid #bbb;
-      padding-top: 4px; /* reduziert */
+      padding-top: 4px;
     }
-
     .addon-tile {
       display: inline-block;
-      border: 2px dashed #555; /* anderer Stil/Farbe als Hauptkachel */
+      border: 2px solid #999; 
       border-radius: 6px;
       padding: 4px;
       margin: 3px;
       text-align: center;
       cursor: pointer;
       transition: background-color 0.3s;
-      background-color: transparent;
+      background-color: #fff; /* Default weiß */
     }
     .addon-tile h3 {
       font-size: 0.85em;
@@ -218,11 +216,9 @@
       margin: 0;
       font-size: 0.8em;
     }
-
     .addon-tile:hover {
       background-color: #eaeaea;
     }
-
     .addon-controls {
       display: flex;
       gap: 4px;
@@ -247,19 +243,19 @@
 <body>
 
 <div class="main-content" id="mainContent">
-  <h1>Farbcodierte Kacheln - Design-Update</h1>
+  <!-- Überschriften entfernt, um mehr Platz zu schaffen. -->
   <div class="drink-container" id="drinkContainer"></div>
 </div>
 
 <div class="summary" id="summarySection">
-  <h2>Übersicht</h2>
+  <!-- Keine Überschrift "Übersicht" mehr -->
 
   <!-- Bestell-Liste (Tabelle) -->
   <div class="summary-items" id="summaryList"></div>
 
-  <div class="summary-row">
-    <div>Summe:</div>
-    <div><span id="grandTotal">0,00 €</span></div>
+  <!-- Summen-Zeile (rechtsbündig) -->
+  <div class="change-container">
+    <div class="change-display" id="grandTotal"></div>
   </div>
 
   <!-- Eingabe: Bargeld -->
@@ -272,10 +268,14 @@
       inputmode="decimal" 
       placeholder="0.00"
     />
+    <label>€</label>
   </div>
 
-  <!-- Rückgeld / Fehlbetrag -->
-  <div class="change-display" id="changeDisplay"></div>
+  <!-- Rückgeld / Fehlbetrag (rechtsbündig) -->
+  <div class="change-container">
+    <div class="change-display" id="changeDisplay"></div>
+  </div>
+
 
   <!-- Reset-Button -->
   <button class="reset-all-btn" id="resetAllButton">Gesamte Bestellung auf 0</button>
@@ -285,24 +285,27 @@
 /*
   Artikel mit Farb-Attribut (color).
   Rückgabe-Artikel haben negative Preise.
+  Wir unterscheiden Hauptartikel und Add-ons:
+  - Hauptartikel wird bei Menge > 0 mit drink.color hinterlegt.
+  - Add-ons bei Menge > 0 bekommen ein abweichendes Grau (statt drink.color).
 */
 let drinks = [
-  { 
-    name: "Glühwein Weiß", 
+{ 
+    name: "Glühwein Rot", 
     price: 4.00, 
     quantity: 0, 
     color: "#FFC8C8", 
-    imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
+    imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
     addOns: [
       { name: "Schuss", price: 1.00, quantity: 0 }
     ]
   },
   { 
-    name: "Glühwein Rot", 
+    name: "Glühwein Weiß", 
     price: 4.00, 
     quantity: 0, 
     color: "#C8FFC8", 
-    imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
+    imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
     addOns: [
       { name: "Schuss", price: 1.00, quantity: 0 }
     ]
@@ -312,37 +315,20 @@ let drinks = [
     price: 3.00, 
     quantity: 0, 
     color: "#C8C8FF",
-    imgUrl: "https://media.istockphoto.com/id/1819859138/de/vektor/set-aus-tassen-hei%C3%9Fer-schokolade-mit-marshmallows-vektor-illustration.jpg?s=612x612&w=0&k=20&c=M1Y0tEqin_awGm_XX-O59JPmdhPBY8hwNb_aaOxf1pM=",
+    imgUrl: "https://media.istockphoto.com/id/503259445/de/foto/schoko-milchshake-smoothie.jpg?s=612x612&w=0&k=20&c=xk0qTKY4lby7eIV4vR3qItvuBvOZp7D1x_UMFWAWrgQ=",
     addOns: [
       { name: "Schuss", price: 1.00, quantity: 0 },
       { name: "Sahne",  price: 0.50, quantity: 0 }
     ]
   },
   { 
-    name: "Glühwein Weiß Kanne", 
-    price: 15.00, 
+    name: "Rückgabe Tasse",
+    price: -2.00, 
     quantity: 0, 
-    color: "#FFE8C8", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
+    color: "#FEC8EC", 
+    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", 
     addOns: []
   },
-  { 
-    name: "Glühwein Rot Kanne", 
-    price: 15.00, 
-    quantity: 0, 
-    color: "#C8FFE8", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Kakao Kanne",    
-    price: 12.00, 
-    quantity: 0, 
-    color: "#E8C8FF", 
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
-    addOns: []
-  },
-
   { 
     name: "Pils",            
     price: 3.00, 
@@ -399,14 +385,37 @@ let drinks = [
     imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", 
     addOns: []
   },
-
-  /* Rückgaben (negative Preise) */
   { 
-    name: "Rückgabe Tasse",
-    price: -2.00, 
+    name: "Rückgabe Flasche", 
+    price: -1.00, 
     quantity: 0, 
-    color: "#FEC8EC", 
-    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", 
+    color: "#FEFEC8",
+    imgUrl: "https://media.istockphoto.com/id/871091342/de/vektor/realistische-gr%C3%BCn-braun-gelb-oder-wei%C3%9F-leere-glas-bierflaschen-isoliert-auf-einem.jpg?s=612x612&w=0&k=20&c=8fd3FviszKZqBipBbPMZ1zUnAcRBRyD139RbVJsca9Q=", 
+    addOns: []
+  },
+
+  { 
+    name: "Glühwein Rot Kanne", 
+    price: 15.00, 
+    quantity: 0, 
+    color: "#C8FFE8", 
+    imgUrl: "https://www.testberichte.de/imgs/p_imgs_og/791447.jpg", 
+    addOns: []
+  },
+  { 
+    name: "Kakao Kanne",    
+    price: 12.00, 
+    quantity: 0, 
+    color: "#E8C8FF", 
+    imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg", 
+    addOns: []
+  },
+  { 
+    name: "Glühwein Weiß Kanne", 
+    price: 15.00, 
+    quantity: 0, 
+    color: "#FFE8C8", 
+    imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg", 
     addOns: []
   },
   { 
@@ -416,18 +425,11 @@ let drinks = [
     color: "#C8FEF0",
     imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
     addOns: []
-  },
-  { 
-    name: "Rückgabe Flasche", 
-    price: -1.00, 
-    quantity: 0, 
-    color: "#FEFEC8",
-    imgUrl: "https://via.placeholder.com/100?text=R-Flasche", 
-    addOns: []
   }
 ];
 
-let preparedStates = {}; // Häkchenzustand: Zeilen "bereit"
+/* Häkchenzustand pro Tabellenzeile (fertig oder nicht) */
+let preparedStates = {};
 
 const mainContent     = document.getElementById('mainContent');
 const drinkContainer  = document.getElementById('drinkContainer');
@@ -471,26 +473,7 @@ function initializeTiles() {
     controls.classList.add('quantity-controls');
     tile.appendChild(controls);
 
-    const minusBtn = document.createElement('button');
-    minusBtn.textContent = "-1";
-    minusBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (drink.quantity > 0) {
-        drink.quantity--;
-        updateView();
-      }
-    });
-    controls.appendChild(minusBtn);
-
-    const plus5Btn = document.createElement('button');
-    plus5Btn.textContent = "+5";
-    plus5Btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      drink.quantity += 5;
-      updateView();
-    });
-    controls.appendChild(plus5Btn);
-
+    // 0
     const zeroBtn = document.createElement('button');
     zeroBtn.textContent = "0";
     zeroBtn.addEventListener('click', (e) => {
@@ -503,6 +486,31 @@ function initializeTiles() {
     });
     controls.appendChild(zeroBtn);
 
+    // -1
+    const minusBtn = document.createElement('button');
+    minusBtn.textContent = "-1";
+    minusBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (drink.quantity > 0) {
+        drink.quantity--;
+        updateView();
+      }
+    });
+    controls.appendChild(minusBtn);
+
+    // +5
+    const plus5Btn = document.createElement('button');
+    plus5Btn.textContent = "+5";
+    plus5Btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      drink.quantity += 5;
+      updateView();
+    });
+    controls.appendChild(plus5Btn);
+
+
+
+    // Klick auf die Kachel => +1
     tile.addEventListener('click', () => {
       drink.quantity++;
       updateView();
@@ -519,12 +527,14 @@ function initializeTiles() {
         const addonTile = document.createElement('div');
         addonTile.classList.add('addon-tile');
 
+        // Klick => +1
         addonTile.addEventListener('click', (e) => {
           e.stopPropagation();
           addon.quantity++;
           updateView();
         });
 
+        // Titel, Preis, Menge
         const addonTitle = document.createElement('h3');
         addonTile.appendChild(addonTitle);
 
@@ -534,10 +544,19 @@ function initializeTiles() {
         const addonQuantity = document.createElement('p');
         addonTile.appendChild(addonQuantity);
 
-        // Add-on Steuerung
+        // Steuerung: -1, ≈, 0
         const addonControls = document.createElement('div');
         addonControls.classList.add('addon-controls');
         addonTile.appendChild(addonControls);
+
+        const addonZeroBtn = document.createElement('button');
+        addonZeroBtn.textContent = "0";
+        addonZeroBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          addon.quantity = 0;
+          updateView();
+        });
+        addonControls.appendChild(addonZeroBtn);
 
         const addonMinusBtn = document.createElement('button');
         addonMinusBtn.textContent = "-1";
@@ -551,7 +570,7 @@ function initializeTiles() {
         addonControls.appendChild(addonMinusBtn);
 
         const alignBtn = document.createElement('button');
-        alignBtn.textContent = "≈";
+        alignBtn.textContent = "=";
         alignBtn.title = "An Hauptgetränk angleichen";
         alignBtn.addEventListener('click', (ev) => {
           ev.stopPropagation();
@@ -559,15 +578,6 @@ function initializeTiles() {
           updateView();
         });
         addonControls.appendChild(alignBtn);
-
-        const addonZeroBtn = document.createElement('button');
-        addonZeroBtn.textContent = "0";
-        addonZeroBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          addon.quantity = 0;
-          updateView();
-        });
-        addonControls.appendChild(addonZeroBtn);
 
         addonElements.push({
           addon,
@@ -609,14 +619,14 @@ function updateView() {
     // Menge
     quantityInfo.textContent = "Menge: " + drink.quantity;
 
-    // Farbliche Anpassung:
+    // Farbliche Anpassung Hauptartikel:
     tile.style.borderColor = drink.color;
     if (drink.quantity > 0) {
       tile.classList.add('active');
-      tile.style.backgroundColor = drink.color;
+      tile.style.backgroundColor = drink.color; 
     } else {
       tile.classList.remove('active');
-      tile.style.backgroundColor = "transparent";
+      tile.style.backgroundColor = "#fff"; /* Zurück zu weiß */
     }
 
     // Add-ons
@@ -631,12 +641,13 @@ function updateView() {
       }
       addonQuantity.textContent = "x " + addon.quantity;
 
-      // Anderer Rahmen, aber dieselbe "Hintergrund"-Logik bei Menge > 0
-      addonTile.style.borderColor = "#555"; /* abweichende Farbe */
+      // Abweichende Färbung bei Menge > 0 
+      // (z.B. helles Grau, unabhängig von drink.color)
+      addonTile.style.borderColor = "#999";
       if (addon.quantity > 0) {
-        addonTile.style.backgroundColor = drink.color;
+        addonTile.style.backgroundColor = "#e0e0e0"; 
       } else {
-        addonTile.style.backgroundColor = "transparent";
+        addonTile.style.backgroundColor = "#fff";
       }
     });
   });
@@ -688,8 +699,8 @@ function updateSummary() {
   });
 
   buildSummaryList(rows);
-
-  grandTotalEl.textContent = total.toFixed(2).replace('.', ',') + " €";
+  grandTotalEl.textContent =
+    "Summe: " + total.toFixed(2).replace('.', ',') + " €";
   calculateChange(total);
   adjustLayout();
 }
@@ -720,8 +731,7 @@ function buildSummaryList(rows) {
       ? r.price.toFixed(2).replace('.', ',') + " €"
       : "–";
     let totalPrice = r.total.toFixed(2).replace('.', ',') + " €";
-
-    let isChecked = preparedStates[r.rowID] === true ? "checked" : "";
+    let isChecked  = preparedStates[r.rowID] === true ? "checked" : "";
 
     html += `
       <tr 
@@ -756,7 +766,7 @@ function buildSummaryList(rows) {
   });
 }
 
-/* Bargeld-Eingabe => Rückgeld/Fehlbetrag */
+/* Bargeld-Eingabe => Rückgeld / Fehlbetrag */
 function calculateChange(total) {
   let cash = parseFloat(cashGivenInput.value);
   if (isNaN(cash)) {
@@ -771,7 +781,7 @@ function calculateChange(total) {
   }
 }
 
-/* Dynamischer Abstand für Hauptbereich */
+/* Dynamischer Abstand für Hauptbereich (verhindert Überlappung) */
 function adjustLayout() {
   const summaryHeight = summarySection.offsetHeight;
   mainContent.style.paddingBottom = (summaryHeight + 10) + "px";
