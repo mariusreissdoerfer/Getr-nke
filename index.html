@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Schleedener Nikolausmarkt - Thekenrechner</title>
+  <title>Schleedener Thekenrechner</title>
   <style>
     /* 
       Allgemeiner Seitenhintergrund in einem diffuseren Grau.
@@ -147,7 +147,7 @@
       user-select: none;
       transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-      border: 3px solid #ccc;
+      border: 8px solid #ccc;
       background-color: #fff; /* Default weiß */
     }
 
@@ -290,143 +290,35 @@
   - Add-ons bei Menge > 0 bekommen ein abweichendes Grau (statt drink.color).
 */
 let drinks = [
-{ 
-    name: "Glühwein Rot", 
-    price: 4.00, 
-    quantity: 0, 
-    color: "#FFC8C8", 
-    imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
-    addOns: [
-      { name: "Schuss", price: 1.00, quantity: 0 }
-    ]
-  },
-  { 
-    name: "Glühwein Weiß", 
-    price: 4.00, 
-    quantity: 0, 
-    color: "#C8FFC8", 
-    imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
-    addOns: [
-      { name: "Schuss", price: 1.00, quantity: 0 }
-    ]
-  },
-  { 
-    name: "Kakao", 
-    price: 3.00, 
-    quantity: 0, 
-    color: "#C8C8FF",
-    imgUrl: "https://media.istockphoto.com/id/503259445/de/foto/schoko-milchshake-smoothie.jpg?s=612x612&w=0&k=20&c=xk0qTKY4lby7eIV4vR3qItvuBvOZp7D1x_UMFWAWrgQ=",
-    addOns: [
-      { name: "Schuss", price: 1.00, quantity: 0 },
-      { name: "Sahne",  price: 0.50, quantity: 0 }
-    ]
-  },
-  { 
-    name: "Rückgabe Tasse",
-    price: -2.00, 
-    quantity: 0, 
-    color: "#FEC8EC", 
-    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Pils",            
-    price: 3.00, 
-    quantity: 0, 
-    color: "#FFC8E8", 
-    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", 
-    addOns: []
-  },
-  { 
-    name: "Kölsch",          
-    price: 3.00, 
-    quantity: 0, 
-    color: "#E8FFC8", 
-    imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Wasser",          
-    price: 2.00, 
-    quantity: 0, 
-    color: "#C8E8FF", 
-    imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Cola",            
-    price: 2.50, 
-    quantity: 0, 
-    color: "#FFD8C8",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", 
-    addOns: []
-  },
-  { 
-    name: "Limo",            
-    price: 2.50, 
-    quantity: 0, 
-    color: "#F8C8FF", 
-    imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Sprite",          
-    price: 2.50, 
-    quantity: 0, 
-    color: "#C8F8FF",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", 
-    addOns: []
-  },
-  { 
-    name: "Apfelschorle",    
-    price: 2.50, 
-    quantity: 0, 
-    color: "#FEE7C8",
-    imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Rückgabe Flasche", 
-    price: -1.00, 
-    quantity: 0, 
-    color: "#FEFEC8",
-    imgUrl: "https://media.istockphoto.com/id/871091342/de/vektor/realistische-gr%C3%BCn-braun-gelb-oder-wei%C3%9F-leere-glas-bierflaschen-isoliert-auf-einem.jpg?s=612x612&w=0&k=20&c=8fd3FviszKZqBipBbPMZ1zUnAcRBRyD139RbVJsca9Q=", 
-    addOns: []
-  },
+  { name: "Pils", price: 2.50, quantity: 0, color: "#FFF4B1", imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", addOns: [] },
+  { name: "Kölsch", price: 2.50, quantity: 0, color: "#D4FFB2", imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", addOns: [] },
+  { name: "Fassbrause Zitrone", price: 2.50, quantity: 0, color: "#FFFBC0", imgUrl: "https://www.mrspeedy.de/cdn/shop/products/20345659_digital-image.webp?v=1664024806", addOns: [] },
+  { name: "Cola", price: 2.50, quantity: 0, color: "#FFDAD4", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", addOns: [] },
+  { name: "Cola Zero", price: 2.50, quantity: 0, color: "#E8D6FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/9/93/Coca_Cola-zero_Logo_300dpi.jpg", addOns: [] },
+  { name: "Limo", price: 2.50, quantity: 0, color: "#FFEAB0", imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", addOns: [] },
+  { name: "Sprite", price: 2.50, quantity: 0, color: "#D4F8FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", addOns: [] },
+  { name: "Apfelschorle", price: 2.50, quantity: 0, color: "#FFEFD0", imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", addOns: [] },
+  { name: "Wasser", price: 2.50, quantity: 0, color: "#CCE7FF", imgUrl: "https://cdn.metro-group.com/de/de_pim_459260002002_02.png?w=400&h=400&mode=pad", addOns: [] },
+  { name: "Pils 0,0 %", price: 2.50, quantity: 0, color: "#FFDEFC", imgUrl: "https://onlinedurst.de/media/image/d4/f4/a2/43563_bitb_pils_033l_72dpi_rgb.jpg", addOns: [] },
+  { name: "Kölsch 0,0 %", price: 2.50, quantity: 0, color: "#D8FFD8", imgUrl: "https://img.rewe-static.de/3274667/38179040_digital-image.png", addOns: [] },
+  { name: "Capri-Sun", price: 0.50, quantity: 0, color: "#FFD1FF", imgUrl: "https://www.neue-verpackung.de/assets/images/0/21-07-01%20Capri-Sun%20Orange%20mit%20Papierhalm-7d642310.jpg", addOns: [] },
+  { name: "Jägermeister", price: 2.00, quantity: 0, color: "#FAD6FF", imgUrl: "https://cdn02.plentymarkets.com/t4l5octwuee2/item/images/888095/full/4067700026668-Jaegermeister-Kraeuterlikoer-3000ml.jpg", addOns: [] },
+  { name: "Feigling", price: 2.00, quantity: 0, color: "#D1D1FF", imgUrl: "https://www.getraenke-handel.com/images/product_images/popup_images/Kleiner-Feigling-2-cl.jpg", addOns: [] },
+  { name: "Flimm", price: 2.00, quantity: 0, color: "#FFD1C1", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/03/Flimm-Waldmeister-07L-Flasche-K%C3%B6lner-Lik%C3%B6r-Waldmeisterlik%C3%B6r-kaufen-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
+  { name: "Bärbel", price: 2.00, quantity: 0, color: "#D1FFF5", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/04/Flimm-B%C3%A4rbelchen-Lik%C3%B6r-K%C3%B6ln-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
+  { name: "Aperol Spritz", price: 6.50, quantity: 0, color: "#FFE5B4", imgUrl: "https://spirituosenworld.de/images/cocktails/aperol-spritz-longdrink-2019.jpg.pagespeed.ce.FE0Eb-GR-R.jpgg", addOns: [] },
+  /* ---------- Speisen ---------- */
+  { name: "Pommes",                price: 3.50, quantity: 0, color: "#FFD700", imgUrl: "https://www.citynews-koeln.de/wp-content/uploads/2016/03/754980_original_R_K_B_by_Tim-Reckmann_pixelio.de_.jpg",     addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Currysauce",            price: 0.50, quantity: 0, color: "#FF8C00", imgUrl: "https://nicostanitzok.de/wp-content/uploads/2023/01/currywurst_rezept_currysauce_currysosse_selber_machen-2.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Braten im Brötchen",    price: 3.50, quantity: 0, color: "#8B4513", imgUrl: "https://as2.ftcdn.net/jpg/00/33/12/63/1000_F_33126338_UQWWrNXV6xjXUd7AhOKtPh4Gs4VsDIJX.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Krakauer im Brötchen",  price: 4.50, quantity: 0, color: "#800000", imgUrl: "https://www.bigtrailie.co.uk/index.php?media/krakauer-im-broetchen.70/full", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Bratwurst mit Fritten", price: 6.50, quantity: 0, color: "#B5651D", imgUrl: "https://live.staticflickr.com/4359/35616258953_d8b4594b5b_b.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Currywurst mit Fritten",price: 7.00, quantity: 0, color: "#FF4500", imgUrl: "https://d569htemax5yg.cloudfront.net/catalog/product/p/2/p2g5533_3.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+  { name: "Krakauer mit Fritten",  price: 7.00, quantity: 0, color: "#A52A2A", imgUrl: "https://www.fokus-fleisch.de/assets/uploads/images/_1280xAUTO_crop_center-center_none/Currywurst_web_xs.jpeg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] }
 
-  { 
-    name: "Glühwein Rot Kanne", 
-    price: 15.00, 
-    quantity: 0, 
-    color: "#C8FFE8", 
-    imgUrl: "https://www.testberichte.de/imgs/p_imgs_og/791447.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Kakao Kanne",    
-    price: 12.00, 
-    quantity: 0, 
-    color: "#E8C8FF", 
-    imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Glühwein Weiß Kanne", 
-    price: 15.00, 
-    quantity: 0, 
-    color: "#FFE8C8", 
-    imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg", 
-    addOns: []
-  },
-  { 
-    name: "Rückgabe Kanne", 
-    price: -10.00, 
-    quantity: 0, 
-    color: "#C8FEF0",
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", 
-    addOns: []
-  }
 ];
+
+
 
 /* Häkchenzustand pro Tabellenzeile (fertig oder nicht) */
 let preparedStates = {};
@@ -526,6 +418,7 @@ function initializeTiles() {
       drink.addOns.forEach((addon) => {
         const addonTile = document.createElement('div');
         addonTile.classList.add('addon-tile');
+        addonTile.style.borderColor = addon.color;
 
         // Klick => +1
         addonTile.addEventListener('click', (e) => {
@@ -642,13 +535,12 @@ function updateView() {
       addonQuantity.textContent = "x " + addon.quantity;
 
       // Abweichende Färbung bei Menge > 0 
-      // (z.B. helles Grau, unabhängig von drink.color)
-      addonTile.style.borderColor = "#999";
-      if (addon.quantity > 0) {
-        addonTile.style.backgroundColor = "#e0e0e0"; 
-      } else {
+        addonTile.style.borderColor = addon.color || "#999";
+        if (addon.quantity > 0) {
+        addonTile.style.backgroundColor = addon.color;
+        } else {
         addonTile.style.backgroundColor = "#fff";
-      }
+        }
     });
   });
 
