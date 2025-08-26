@@ -198,27 +198,42 @@
     .summary{ z-index: 1000; }
     .quantity-badge{ z-index: 0; }
     /* Compact: Übersicht & Buttons flacher */
-    body.compact .summary-header{ padding:6px 10px; }
+    body.compact .summary-header{ padding:4px 8px; }
     body.compact .summary-toggle{ padding:2px 0; }
     body.compact .summary-title{ font-size:.95em; }
     body.compact .summary-hint{ font-size:.7em; }
-    body.compact .summary-content{ padding:6px 10px; max-height:55vh; }
+    body.compact .summary-content{ padding:4px 8px; max-height:52vh; }
     body.compact .summary-items{ margin-bottom:6px; border-radius:8px; }
-    body.compact .summary-table th, body.compact .summary-table td{ padding:4px 6px; }
+    body.compact .summary-table th, body.compact .summary-table td{ padding:3px 5px; }
     body.compact .change-container{ margin:4px 0; }
     body.compact .change-display{ font-size: clamp(1rem, 3.5vw, 1.4rem); }
     body.compact #grandTotal{ font-size: clamp(1.1rem, 3.5vw, 1.6rem); }
     body.compact .cash-input{ gap:6px; margin:4px 0; }
     body.compact .cash-input input{ padding:6px 8px; height:36px; font-size:1em; }
-    body.compact .reset-all-btn{ padding:8px 10px; border-radius:10px; font-size:.95em; }
+    body.compact .reset-all-btn{ padding:6px 8px; border-radius:8px; font-size:.9em; min-height:36px; }
 
     /* Dichte-Button: Icon + Text, auf Handy nur Icon */
     .density-toggle .density-icon{ display:inline-block; font-size:1.1em; line-height:1; }
     .density-toggle .density-text{ margin-left:6px; }
     @media (max-width: 640px){
-      .density-toggle{ padding:6px; margin-left:0; flex:0 0 auto; }
-      .density-toggle .density-text{ display:none; }
+      .density-toggle{ padding:0 !important; width:36px; height:36px; margin-left:0; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+      .density-toggle .density-text{ display:none !important; }
     }
+    /* Kompakt: Übersicht & Controls noch flacher */
+    body.compact .summary-header{ padding:2px 6px; }
+    body.compact .summary-content{ padding:4px 6px; max-height:50vh; }
+    body.compact .summary-table th, body.compact .summary-table td{ padding:2px 4px; font-size:.9em; }
+    body.compact .cash-input{ margin:2px 0; gap:6px; }
+    body.compact .cash-input input{ height:32px; padding:4px 8px; font-size:1em; }
+    body.compact #grandTotal{ font-size:1.2rem; }
+    body.compact .change-display{ font-size:1rem; }
+    body.compact .reset-all-btn{ padding:6px 8px; min-height:32px; border-radius:8px; font-size:.9em; }
+
+    /* Einzeilige Leiste: Betrag gegeben + ∑ Gesamtsumme */
+    .summary-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
+    .summary-bar .cash-input{ margin:0; }
+    .summary-bar .cash-input input{ width:140px; }
+    @media (max-width:480px){ .summary-bar .cash-input input{ width:110px; } }
   </style>
 </head>
 <body>
@@ -358,6 +373,7 @@
         selectedCategory = cat;
         categoryBar.querySelectorAll('.category-btn').forEach(b=> b.setAttribute('aria-pressed', b.textContent===selectedCategory ? 'true' : 'false'));
         applyCategoryFilter();
+    buildSummaryBar();
       });
       categoryBar.appendChild(btn);
     });
@@ -379,15 +395,14 @@
     densityBtn.className='category-btn density-toggle';
     const setLabel = ()=>{
       const compactOn = document.body.classList.contains('compact');
-      densityBtn.innerHTML = `<span class="density-icon" aria-hidden="true">▦</span><span class="density-text">${compactOn ? 'Kompakt: an' : 'Kompakt: aus'}</span>`;
+      densityBtn.innerHTML = `<span class="density-icon" aria-hidden="true">▦</span>`; // Icon-only
       densityBtn.setAttribute('aria-label', compactOn ? 'Kompaktmodus ist an – tippen zum Ausschalten' : 'Kompaktmodus ist aus – tippen zum Einschalten');
-      densityBtn.title = compactOn ? 'Kompaktmodus ausschalten' : 'Kompaktmodus einschalten';
-    };
+      densityBtn.title = compactOn ? 'Kompaktmodus aus' : 'Kompaktmodus an';
+     };
     setLabel();
     densityBtn.addEventListener('click', ()=>{ setCompact(!document.body.classList.contains('compact')); setLabel(); });
     categoryBar.appendChild(densityBtn);
-  };
-
+  }
 
   function initializeTiles(){
     drinks.forEach((drink) => {
@@ -522,9 +537,9 @@
       total += lineTotal + addOnSum;
     });
     buildSummaryList(rows);
-    const totalText = ("Summe: " + total.toFixed(2).replace('.', ',') + " €");
+    const totalText = ("∑ " + total.toFixed(2).replace('.', ',') + " €");
     grandTotalEl.textContent = totalText;
-    grandTotalMini.textContent = total.toFixed(2).replace('.', ',') + ' €';
+    grandTotalMini.textContent = '∑ ' + total.toFixed(2).replace('.', ',') + ' €';
     calculateChange(total);
     adjustLayout();
   }
@@ -598,9 +613,29 @@
   }
 
   function sanitizeSummary(){
-    // Nur eine Summary behalten
     const summaries = document.querySelectorAll('.summary');
     summaries.forEach((el, idx)=>{ if(idx>0) el.remove(); });
+    document.querySelectorAll('.summary-toggle').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
+    document.querySelectorAll('#grandTotalMini').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
+  }
+
+  // Erzeuge/ordne die einzeilige Leiste: Betrag gegeben + ∑ Gesamtsumme
+  function buildSummaryBar(){
+    const sc = document.getElementById('summaryContent');
+    if(!sc) return;
+    let bar = document.getElementById('summaryBar');
+    const itemsWrap = document.getElementById('summaryList')?.parentElement;
+    const totalWrap = grandTotalEl ? grandTotalEl.parentElement : null; // .change-container
+    const cash = document.querySelector('.cash-input');
+    if(!bar){
+      bar = document.createElement('div');
+      bar.className = 'summary-bar';
+      bar.id = 'summaryBar';
+      if(itemsWrap && itemsWrap.nextSibling){ sc.insertBefore(bar, itemsWrap.nextSibling); }
+      else{ sc.insertBefore(bar, sc.firstChild); }
+    }
+    if(totalWrap && totalWrap.parentElement !== bar){ bar.appendChild(totalWrap); }
+    if(cash && cash.parentElement !== bar){ bar.appendChild(cash); }
     // Nur Toggle im Header erlauben
     document.querySelectorAll('.summary-toggle').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
     // Nur Mini-Summe im Header erlauben
