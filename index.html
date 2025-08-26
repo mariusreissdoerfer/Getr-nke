@@ -143,7 +143,7 @@
     }
 
     /* Kategorien-Leiste */
-    .category-bar{ position:sticky; top:0; z-index:3; background:#f5f5f7; padding:8px 0; display:flex; gap:8px; flex-wrap:wrap; }
+    .category-bar{ position:sticky; top:0; z-index:3; background:#f5f5f7; padding:8px 0; display:flex; gap:8px; flex-wrap:wrap; row-gap:8px; }
     .category-btn{ border:1px solid #ccc; background:#fff; padding:8px 12px; border-radius:9999px; cursor:pointer; font-size:1rem; }
     .category-btn[aria-pressed="true"]{ background:#111; color:#fff; border-color:#111; }
     /* Einheitlicher Startpunkt für Text: fixer Bildbereich */
@@ -176,7 +176,7 @@
     }
     .summary-table tbody tr.row-checked{ box-shadow: inset 0 0 0 3px #2563eb; }
     /* --- Kompaktmodus & Zähler-Badge --- */
-    .quantity-badge{ position:absolute; top:6px; right:6px; display:none; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 6px; border-radius:9999px; font-weight:700; font-size:.9em; }
+    .quantity-badge{ position:absolute; top:6px; right:6px; z-index:1; display:none; align-items:center; justify-content:center; min-width: clamp(30px, 7vw, 44px); height: clamp(30px, 7vw, 44px); padding: 0 10px; border-radius:9999px; font-weight:800; font-size: clamp(1rem, 3.6vw, 1.35rem); line-height:1; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
     .density-toggle{ margin-left:auto; }
     @media (max-width:480px){ .density-toggle{ font-size:.9em; padding:6px 10px; } }
 
@@ -187,6 +187,13 @@
     body.compact .price{ font-size:.85em; }
     body.compact .quantity-display{ display:none; }
     body.compact .quantity-controls button{ min-width:40px; min-height:40px; padding:6px 8px; font-size:.95em; }
+    /* Mobile: Kategorienzeile immer einzeilig, horizontal scrollen statt Umbruch */
+    @media (max-width: 640px){
+      .category-bar{ flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable both-edges; }
+      .category-btn{ flex: 0 0 auto; }
+      .density-toggle{ margin-left: 8px; }
+      .category-bar{ overscroll-behavior-x: contain; }
+    }
   </style>
 </head>
 <body>
