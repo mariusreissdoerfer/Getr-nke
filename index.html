@@ -295,6 +295,10 @@
     { name: "Flimm", price: 2.00, quantity: 0, color: "#FFD1C1", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/03/Flimm-Waldmeister-07L-Flasche-K%C3%B6lner-Lik%C3%B6r-Waldmeisterlik%C3%B6r-kaufen-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
     { name: "Bärbel", price: 2.00, quantity: 0, color: "#D1FFF5", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/04/Flimm-B%C3%A4rbelchen-Lik%C3%B6r-K%C3%B6ln-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
     { name: "Aperol Spritz", price: 6.50, quantity: 0, color: "#FFE5B4", imgUrl: "https://spirituosenworld.de/images/cocktails/aperol-spritz-longdrink-2019.jpg", addOns: [] },
+    { name: "El Presidente", price: 6.50, quantity: 0, color: "#FFE0CC", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/9/90/El_Presidente_Cocktail.jpg", addOns: [] },
+    { name: "Colada", price: 6.50, quantity: 0, color: "#FFF0C1", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/0/07/Pi%C3%B1a_Colada.jpg", addOns: [] },
+    { name: "Mojito", price: 6.50, quantity: 0, color: "#DFF8E3", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Mojito_20140712_200511.jpg", addOns: [] },
+    { name: "Wild Berry", price: 6.50, quantity: 0, color: "#FFD6EC", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/7/7e/Berry_cocktail.jpg", addOns: [] },
     /* ---------- Speisen ---------- */
     { name: "Pommes",                price: 3.50, quantity: 0, color: "#FFD700", imgUrl: "https://www.citynews-koeln.de/wp-content/uploads/2016/03/754980_original_R_K_B_by_Tim-Reckmann_pixelio.de_.jpg",     addOns: [] },
     { name: "Currysauce",            price: 0.50, quantity: 0, color: "#FF8C00", imgUrl: "https://nicostanitzok.de/wp-content/uploads/2023/01/currywurst_rezept_currysauce_currysosse_selber_machen-2.jpg", addOns: [] },
@@ -319,7 +323,8 @@
   // Kategorien zuweisen
   const eisNames = new Set(["Cornetto Erdbeere/Schoko","Big Sandwich","Kaktus","BumBum","Calippo"]);
   const speisenNames = new Set(["Pommes","Currysauce","Bratwurst im Brötchen","Krakauer im Brötchen","Bratwurst mit Fritten","Currywurst mit Fritten","Krakauer mit Fritten","Sauze"]);
-  drinks.forEach(d=>{ if(eisNames.has(d.name)) d.category='Eis'; else if(speisenNames.has(d.name)) d.category='Speisen'; else d.category='Getränke'; });
+  const cocktailNames = new Set(["El Presidente","Colada","Mojito","Wild Berry"]);
+  drinks.forEach(d=>{ if(eisNames.has(d.name)) d.category='Eis'; else if(speisenNames.has(d.name)) d.category='Speisen'; else if(cocktailNames.has(d.name)) d.category='Cocktail'; else d.category='Getränke'; });
 
   let preparedStates = {};
 
