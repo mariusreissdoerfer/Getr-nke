@@ -197,6 +197,28 @@
     /* Sicherstellen: Übersicht liegt über Kacheln/Badges */
     .summary{ z-index: 1000; }
     .quantity-badge{ z-index: 0; }
+    /* Compact: Übersicht & Buttons flacher */
+    body.compact .summary-header{ padding:6px 10px; }
+    body.compact .summary-toggle{ padding:2px 0; }
+    body.compact .summary-title{ font-size:.95em; }
+    body.compact .summary-hint{ font-size:.7em; }
+    body.compact .summary-content{ padding:6px 10px; max-height:55vh; }
+    body.compact .summary-items{ margin-bottom:6px; border-radius:8px; }
+    body.compact .summary-table th, body.compact .summary-table td{ padding:4px 6px; }
+    body.compact .change-container{ margin:4px 0; }
+    body.compact .change-display{ font-size: clamp(1rem, 3.5vw, 1.4rem); }
+    body.compact #grandTotal{ font-size: clamp(1.1rem, 3.5vw, 1.6rem); }
+    body.compact .cash-input{ gap:6px; margin:4px 0; }
+    body.compact .cash-input input{ padding:6px 8px; height:36px; font-size:1em; }
+    body.compact .reset-all-btn{ padding:8px 10px; border-radius:10px; font-size:.95em; }
+
+    /* Dichte-Button: Icon + Text, auf Handy nur Icon */
+    .density-toggle .density-icon{ display:inline-block; font-size:1.1em; line-height:1; }
+    .density-toggle .density-text{ margin-left:6px; }
+    @media (max-width: 640px){
+      .density-toggle{ padding:6px; margin-left:0; flex:0 0 auto; }
+      .density-toggle .density-text{ display:none; }
+    }
   </style>
 </head>
 <body>
@@ -355,11 +377,17 @@
     densityBtn.id = 'densityToggle';
     densityBtn.type='button';
     densityBtn.className='category-btn density-toggle';
-    const setLabel = ()=>{ densityBtn.textContent = document.body.classList.contains('compact') ? 'Kompakt: an' : 'Kompakt: aus'; };
+    const setLabel = ()=>{
+      const compactOn = document.body.classList.contains('compact');
+      densityBtn.innerHTML = `<span class="density-icon" aria-hidden="true">▦</span><span class="density-text">${compactOn ? 'Kompakt: an' : 'Kompakt: aus'}</span>`;
+      densityBtn.setAttribute('aria-label', compactOn ? 'Kompaktmodus ist an – tippen zum Ausschalten' : 'Kompaktmodus ist aus – tippen zum Einschalten');
+      densityBtn.title = compactOn ? 'Kompaktmodus ausschalten' : 'Kompaktmodus einschalten';
+    };
     setLabel();
     densityBtn.addEventListener('click', ()=>{ setCompact(!document.body.classList.contains('compact')); setLabel(); });
     categoryBar.appendChild(densityBtn);
-  }
+  };
+
 
   function initializeTiles(){
     drinks.forEach((drink) => {
