@@ -160,6 +160,10 @@
     /* Entferne ggf. untere Geisterleiste */
     .summary > .summary-content > .summary-toggle, .summary > .summary-content > #grandTotalMini{ display:none !important; }
     .summary-header #grandTotalMini{ display:inline; }
+    /* Kleinere, einzeilige Hinweis-Label im Header */
+    .summary-title{ white-space: nowrap; min-width:0; }
+    .summary-hint{ opacity:.6; font-size:.85em; white-space:nowrap; }
+    @media (max-width: 600px){ .summary-hint{ font-size:.75em; } }
   </style>
 </head>
 <body>
@@ -173,7 +177,7 @@
   <div class="summary" id="summarySection" aria-live="polite">
     <div class="summary-header">
       <button id="summaryToggle" class="summary-toggle" aria-expanded="true" aria-controls="summaryContent">
-        <div class="summary-title">Übersicht <span style="opacity:.6">(Tippen zum Ein-/Ausklappen)</span></div>
+        <div class="summary-title">Übersicht <span class="summary-hint">(Tippen zum Ein-/Ausklappen)</span></div>
         <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
       </button>
       
