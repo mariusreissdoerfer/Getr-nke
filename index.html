@@ -175,6 +175,18 @@
       accent-color: #2563eb; /* Blau */
     }
     .summary-table tbody tr.row-checked{ box-shadow: inset 0 0 0 3px #2563eb; }
+    /* --- Kompaktmodus & Zähler-Badge --- */
+    .quantity-badge{ position:absolute; top:6px; right:6px; display:none; align-items:center; justify-content:center; min-width:26px; height:26px; padding:0 6px; border-radius:9999px; font-weight:700; font-size:.9em; }
+    .density-toggle{ margin-left:auto; }
+    @media (max-width:480px){ .density-toggle{ font-size:.9em; padding:6px 10px; } }
+
+    body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    @media (max-width: 560px){ body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
+    body.compact .drink-tile{ padding:8px; border-width:4px; }
+    body.compact .tile-media{ height:64px; }
+    body.compact .price{ font-size:.85em; }
+    body.compact .quantity-display{ display:none; }
+    body.compact .quantity-controls button{ min-width:40px; min-height:40px; padding:6px 8px; font-size:.95em; }
   </style>
 </head>
 <body>
@@ -272,6 +284,13 @@
   const summaryToggle   = document.getElementById('summaryToggle');
   const categoryBar    = document.getElementById('categoryBar');
   const resetAllBtnHeader = document.getElementById('resetAllButtonHeader');
+  const COMPACT_KEY = 'compactMode';
+  if (localStorage.getItem(COMPACT_KEY) === '1') { document.body.classList.add('compact'); }
+  function setCompact(on){
+    document.body.classList.toggle('compact', !!on);
+    localStorage.setItem(COMPACT_KEY, document.body.classList.contains('compact') ? '1' : '0');
+    adjustLayout();
+  }
 
   let tileElements = [];
 
@@ -318,6 +337,19 @@
     });
     adjustLayout();
   }
+  function buildDensityToggle(){
+    if(!categoryBar) return;
+    const old = document.getElementById('densityToggle');
+    if(old) old.remove();
+    const densityBtn = document.createElement('button');
+    densityBtn.id = 'densityToggle';
+    densityBtn.type='button';
+    densityBtn.className='category-btn density-toggle';
+    const setLabel = ()=>{ densityBtn.textContent = document.body.classList.contains('compact') ? 'Kompakt: an' : 'Kompakt: aus'; };
+    setLabel();
+    densityBtn.addEventListener('click', ()=>{ setCompact(!document.body.classList.contains('compact')); setLabel(); });
+    categoryBar.appendChild(densityBtn);
+  }
 
   function initializeTiles(){
     drinks.forEach((drink) => {
@@ -340,6 +372,7 @@
 
       const priceInfo = document.createElement('p'); priceInfo.classList.add('price'); tile.appendChild(priceInfo);
       const quantityInfo = document.createElement('p'); quantityInfo.classList.add('quantity-display'); tile.appendChild(quantityInfo);
+      const quantityBadge = document.createElement('span'); quantityBadge.classList.add('quantity-badge'); tile.appendChild(quantityBadge);
 
       const controls = document.createElement('div'); controls.classList.add('quantity-controls'); tile.appendChild(controls);
 
@@ -389,15 +422,29 @@
       }
 
       drinkContainer.appendChild(tile);
-      tileElements.push({ drink, tile, priceInfo, quantityInfo, addonElements });
+      tileElements.push({ drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements });
     });
   }
 
   function updateView(){
     tileElements.forEach(el=>{
-      const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
+      const { drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements } = el;
       priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Rückgabe)" : drink.price.toFixed(2)+" €").replace('.', ',');
       quantityInfo.textContent = "Menge: " + drink.quantity;
+
+      // Badge im Kompaktmodus
+      if (quantityBadge){
+        if (drink.quantity > 0){
+          quantityBadge.textContent = String(drink.quantity);
+          quantityBadge.style.display = 'inline-flex';
+          const tc = getTextColor(drink.color);
+          quantityBadge.style.color = (tc === '#fff') ? '#fff' : '#111';
+          quantityBadge.style.background = (tc === '#fff') ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.65)';
+          quantityBadge.style.border = '1px solid rgba(0,0,0,.15)';
+        } else {
+          quantityBadge.style.display = 'none';
+        }
+      }
 
       tile.style.borderColor = drink.color;
       if(drink.quantity>0){ tile.classList.add('active'); tile.style.backgroundColor = drink.color;
@@ -530,16 +577,28 @@
 
   // Init
   window.addEventListener('load', ()=>{
-    initializeTiles(); updateView(); buildCategoryBar(); applyCategoryFilter();
-    // Header sicher vor den Inhalt setzen
+    // Grundinitialisierung
+    initializeTiles();
+    updateView();
+
+    // Filter-/UI-Bars
+    buildCategoryBar();
+    buildDensityToggle();
+    applyCategoryFilter();
+
+    // Header sicher über den Inhalt setzen
     const headerEl = document.querySelector('.summary-header');
     const contentEl = document.getElementById('summaryContent');
     const sectionEl = document.getElementById('summarySection');
     if (sectionEl && headerEl && contentEl && headerEl.nextElementSibling !== contentEl) {
       sectionEl.insertBefore(headerEl, contentEl);
     }
-    ensureResetButtonInContent();
-    sanitizeSummary();
+
+    // Zusätzliche Sicherungen/Buttons
+    if (typeof ensureResetButtonInContent === 'function') ensureResetButtonInContent();
+    if (typeof sanitizeSummary === 'function') sanitizeSummary();
+
+    // Startzustand
     setCollapsed(false);
   });
 
