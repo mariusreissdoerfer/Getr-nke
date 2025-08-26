@@ -1,717 +1,495 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Schleedener Thekenrechner</title>
   <style>
-    /* 
-      Allgemeiner Seitenhintergrund in einem diffuseren Grau.
-      Box-Sizing für zuverlässige Layout-Kontrolle.
-    */
-    * {
-      box-sizing: border-box;
-    }
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: sans-serif;
-      height: 100%;
-      background-color: #f2f2f2; /* weicher Grauton */
+    :root{
+      --page-max: 100vw;
+      --radius: 12px;
+      --shadow: 0 2px 10px rgba(0,0,0,.12);
+      --tile-border: 6px;
+      --gap: 12px;
     }
 
-    /* Haupt-Container für die Kacheln */
-    .main-content {
-      margin: 0 auto;
-      max-width: 2000px; 
-      padding: 10px 20px;
-      /* Der Abstand nach unten wird per JS gesetzt,
-         damit die fixierte Zusammenfassung nicht überlappt. */
+    *{ box-sizing: border-box; }
+    html, body{
+      margin:0; padding:0; height:100%;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background:#f5f5f7; color:#111;
     }
 
-    /* Zusammenfassung fixiert am Seitenende */
-    .summary {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 2000px;
-      background: #fff;
-      border-top: 1px solid #ccc;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    /* Bessere Lesbarkeit auf allen Displays */
+    body{ font-size: clamp(15px, 1.6vw, 18px); line-height:1.35; }
 
-      /* Maximale Höhe, damit sie bei großen Tabellen nicht den ganzen Bildschirm überlagert */
-      max-height: 50vh;
-      overflow-y: auto;
-
-      /* Innenabstand */
-      padding: 10px 20px;
+    /* Haupt-Container */
+    .main-content{
+      margin:0 auto; max-width: var(--page-max);
+      padding: 12px 16px 80px; /* Platz unten; wird via JS erweitert */
     }
 
-    /* Zusammenfassungstabelle */
-    .summary-items {
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      margin-bottom: 10px;
-      overflow: auto;
-      background-color: #fff;
+    /* Grid für Kacheln – passt sich flexibel an */
+    .drink-container{
+      display:grid; gap: var(--gap);
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     }
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9em;
+    @media (max-width: 900px){
+      .drink-container{ grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
     }
-    .summary-table th,
-    .summary-table td {
-      text-align: left;
-      padding: 4px 6px;
-      border-bottom: 1px solid #eee;
-    }
-    .summary-table th {
-      background: #f7f7f7;
-      position: sticky; /* bleibt beim Scrollen sichtbar */
-      top: 0;
-      z-index: 1;
+    @media (max-width: 560px){
+      .drink-container{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
 
-    /* Summenzeile (Summe in doppelter Schriftgröße) */
-    .summary-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      font-size: 1em;
+    /* Kacheln (Touch‑freundlich) */
+    .drink-tile{
+      position:relative; border-radius: var(--radius);
+      padding: 10px; text-align:center; user-select:none; cursor:pointer;
+      transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease;
+      box-shadow: var(--shadow); border: var(--tile-border) solid #d9d9de; background:#fff;
+      touch-action: manipulation; /* schnelles Click-Verhalten auf Mobilgeräten */
     }
-    .summary-row #grandTotal {
-      font-size: 2em;   /* doppelte Schriftgröße */
-      font-weight: bold;
+    .drink-tile:focus-visible{ outline: 3px solid #2563eb; outline-offset: 2px; }
+
+    .drink-tile h2{ margin:.25em 0 .35em; font-size: clamp(1rem, 2.8vw, 1.25rem); }
+
+    .drink-tile img{
+      max-width: 120px; max-height: 100%; height:auto; display:block; margin: 0 auto 6px;
+      object-fit: contain; border-radius: 8px;
     }
 
-    /* Eingabefeld für Bargeld */
-    .cash-input {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
+    /* Menge/Preis */
+    .quantity-display{ font-weight:700; margin:.35em 0; font-size: clamp(1rem, 3.2vw, 1.2rem); }
+    .price{ margin:.15em 0; font-size: .95em; color:#333; }
+
+    .quantity-controls{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+    .quantity-controls button{
+      font-size: clamp(1rem, 3.6vw, 1.15rem);
+      padding: 10px 14px; border-radius: 10px; border:1px solid #8a8a8a; background:#fafafa; cursor:pointer;
+      min-width: 48px; min-height: 44px; touch-action: manipulation;
     }
-    .cash-input label {
-      white-space: nowrap;
-    }
-    .cash-input input {
-      width: 100px;
-      font-size: 1em;
-      padding: 4px;
+    .quantity-controls button:active{ transform: translateY(1px); }
+
+    /* Aktive Kachel bekommt farbigen Hintergrund */
+    .drink-tile.active{ box-shadow: 0 3px 14px rgba(0,0,0,.18); }
+
+    /* Add-ons */
+    .addons-container{ margin-top:8px; border-top:1px solid #cfcfd4; padding-top:8px; display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:6px; }
+    .addon-tile{ display:block; width:100%; border:2px solid #999; border-radius: 10px; padding:6px 8px; margin:0; text-align:center; cursor:pointer; background:#fff; transition: background-color .25s ease; min-width:auto; word-break: break-word; }
+    .addon-tile h3{ margin:0 0 2px; font-size:.95em; }
+    .addon-tile p{ margin:0; font-size:.85em; }
+    .addon-controls{ display:grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap:6px; justify-content:stretch; align-items:stretch; margin-top:6px; }
+    .addon-controls button{ width:100%; min-width:0; min-height:44px; padding:8px 10px; border-radius:10px; border:1px solid #8a8a8a; background:#fafafa; font-size:1rem; cursor:pointer; }
+
+    /* Zusammenfassung als Bottom‑Sheet */
+    .summary{
+      position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
+      width: 100%; max-width: var(--page-max); background:#fff; border-top:1px solid #ccc; box-shadow: 0 -6px 20px rgba(0,0,0,.18);
+      max-height: 60vh; overflow: hidden; border-top-left-radius: 14px; border-top-right-radius: 14px;
+      padding-bottom: env(safe-area-inset-bottom);
     }
 
-    /* Das Rückgeld wird separat, rechtsbündig dargestellt */
-    .change-container {
-      display: flex;
-      justify-content: flex-end; /* rechtsbündig */
-      margin-bottom: 8px;
+    .summary-header{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; position:sticky; top:0; background:#fff; z-index:2; border-bottom:1px solid #eee;
     }
-    .change-display {
-      font-weight: bold;
-      font-size: 2em;
+    .summary-title{ display:flex; align-items:center; gap:8px; font-weight:700; }
+    .summary-toggle{
+      display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+      background:transparent; border:0; padding:8px 0; cursor:pointer; font: inherit; text-align:left;
+    }
+    .summary-toggle .chevron{ transition: transform .2s ease; }
+    .summary.collapsed .summary-toggle .chevron{ transform: rotate(-90deg); }
+
+    .summary-content{ padding: 10px 16px; overflow-y:auto; max-height: 50vh; }
+    .summary.collapsed .summary-content{ display:none; }
+
+    .summary-items{ border:1px solid #ddd; border-radius: 10px; background:#fff; overflow:auto; margin-bottom:10px; }
+    .summary-table{ width:100%; border-collapse: collapse; font-size: .95em; }
+    .summary-table th, .summary-table td{ text-align:left; padding:6px 8px; border-bottom:1px solid #eee; }
+    .summary-table th{ background:#fafafa; position:sticky; top:0; z-index:1; }
+
+    .summary-row{ display:flex; justify-content:space-between; gap:10px; margin-bottom:8px; }
+    #grandTotal{ font-size: clamp(1.25rem, 4vw, 2rem); font-weight:800; }
+    #grandTotalMini{ font-weight:700; }
+
+    .cash-input{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:6px 0; }
+    .cash-input input{ width: 140px; font-size: 1.05em; padding: 8px 10px; border-radius: 10px; border:1px solid #bbb; }
+
+    .change-container{ display:flex; justify-content:flex-end; margin: 8px 0; }
+    .change-display{ font-weight:800; font-size: clamp(1.25rem, 4vw, 2rem); }
+
+    .reset-all-btn{ padding: 12px 16px; cursor:pointer; border-radius: 12px; border:1px solid #7b7b7b; background:#d7fbd4; width:100%; font-size:1.05em; }
+
+    /* Mobile: Bottom‑Sheet standardmäßig eingeklappt */
+    @media (max-width: 640px){
+      .summary{ max-height: 70vh; }
     }
 
-    /* Reset-Button */
-    .reset-all-btn {
-      padding: 10px 15px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #777777;
-      background: #c5ffba;
-      margin-top: 8px;
-      width: 100%;
-      font-size: 1em;
+    /* Bewegungen für Menschen mit eingeschränkter Bewegungseinstellung reduzieren */
+    @media (prefers-reduced-motion: reduce){
+      *{ transition: none !important; scroll-behavior: auto !important; }
+    }
+    /* Tablet: volle Breite ausnutzen */
+    @media (min-width: 640px) and (max-width: 1100px){
+      :root{ --page-max: 100vw; }
+      .main-content, .summary{ max-width: 100vw; }
+      .summary{ border-top-left-radius: 0; border-top-right-radius: 0; }
+    }
+    /* Desktop: volle Breite */
+    @media (min-width: 1100px){
+      :root{ --page-max: 100vw; }
+      .main-content, .summary{ max-width: 100vw; }
     }
 
-    /* Kachel-Grid */
-    .drink-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 10px;
-    }
-
-    /*
-      Kacheln:
-      - Hintergrund standardmäßig weiß (nicht transparent).
-      - Größerer Rahmen (3px).
-      - Buttons insgesamt größer (touchfreundlich).
-    */
-    .drink-tile {
-      position: relative;
-      border-radius: 6px;
-      padding: 6px; 
-      text-align: center;
-      cursor: pointer;
-      user-select: none;
-      transition: background-color 0.3s, box-shadow 0.3s, border-color 0.3s;
-      box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
-      border: 8px solid #ccc;
-      background-color: #fff; /* Default weiß */
-    }
-
-    .drink-tile h2 {
-      margin: 0.3em 0;
-      font-size: 1em;
-    }
-    .drink-tile img {
-      max-width: 120px;
-      max-height: 80px;
-      height: auto;
-      display: block;
-      margin: 0 auto 4px auto;
-    }
-
-    /* Preis & Menge */
-    .quantity-display {
-      font-size: 1.1em;
-      font-weight: bold;
-      margin: 0.3em 0;
-    }
-
-    .quantity-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 4px;
-    }
-    .quantity-controls button {
-      font-size: 1.1em;
-      padding: 8px 12px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #777;
-      background: #f5f5f5;
-    }
-
-    /* 
-      Add-on-Kacheln:
-      - Solider Rahmen (nicht gestrichelt).
-      - Andere Farbe bei Menge > 0 (z.B. ein helleres Grau), unabhängig vom Hauptgetränk.
-      (Kannst du natürlich beliebig anpassen.)
-    */
-    .addons-container {
-      margin-top: 4px; 
-      border-top: 1px solid #bbb;
-      padding-top: 4px;
-    }
-    .addon-tile {
-      display: inline-block;
-      border: 2px solid #999; 
-      border-radius: 6px;
-      padding: 4px;
-      margin: 3px;
-      text-align: center;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      background-color: #fff; /* Default weiß */
-    }
-    .addon-tile h3 {
-      font-size: 0.85em;
-      margin: 0 0 2px 0;
-    }
-    .addon-tile p {
-      margin: 0;
-      font-size: 0.8em;
-    }
-    .addon-tile:hover {
-      background-color: #eaeaea;
-    }
-    .addon-controls {
-      display: flex;
-      gap: 4px;
-      margin-top: 4px;
-      justify-content: center;
-    }
-    .addon-controls button {
-      font-size: 1em;
-      padding: 6px 8px;
-      cursor: pointer;
-      border-radius: 4px;
-      border: 1px solid #777;
-      background: #f5f5f5;
-    }
-
-    /* .active => etwas kräftigerer Schatten, wenn Menge > 0 */
-    .drink-tile.active {
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-    }
+    /* Kategorien-Leiste */
+    .category-bar{ position:sticky; top:0; z-index:3; background:#f5f5f7; padding:8px 0; display:flex; gap:8px; flex-wrap:wrap; }
+    .category-btn{ border:1px solid #ccc; background:#fff; padding:8px 12px; border-radius:9999px; cursor:pointer; font-size:1rem; }
+    .category-btn[aria-pressed="true"]{ background:#111; color:#fff; border-color:#111; }
+    /* Einheitlicher Startpunkt für Text: fixer Bildbereich */
+    .tile-media{ height: 96px; display:flex; align-items:center; justify-content:center; }
+    .drink-tile{ overflow: hidden; }
   </style>
 </head>
 <body>
 
-<div class="main-content" id="mainContent">
-  <!-- Überschriften entfernt, um mehr Platz zu schaffen. -->
-  <div class="drink-container" id="drinkContainer"></div>
-</div>
-
-<div class="summary" id="summarySection">
-  <!-- Keine Überschrift "Übersicht" mehr -->
-
-  <!-- Bestell-Liste (Tabelle) -->
-  <div class="summary-items" id="summaryList"></div>
-
-  <!-- Summen-Zeile (rechtsbündig) -->
-  <div class="change-container">
-    <div class="change-display" id="grandTotal"></div>
+  <div class="main-content" id="mainContent">
+    <div class="category-bar" id="categoryBar"></div>
+    <div class="drink-container" id="drinkContainer"></div>
   </div>
 
-  <!-- Eingabe: Bargeld -->
-  <div class="cash-input">
-    <label for="cashGiven">Betrag gegeben:</label>
-    <input 
-      type="number" 
-      id="cashGiven" 
-      step="0.01" 
-      inputmode="decimal" 
-      placeholder="0.00"
-    />
-    <label>€</label>
+  <div class="summary" id="summarySection" aria-live="polite">
+    <div class="summary-header">
+      <button id="summaryToggle" class="summary-toggle" aria-expanded="true" aria-controls="summaryContent">
+        <div class="summary-title">Übersicht <span style="opacity:.6">(Tippen zum Ein-/Ausklappen)</span></div>
+        <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
+      </button>
+    </div>
+
+    <div class="summary-content" id="summaryContent">
+      <div class="summary-items" id="summaryList"></div>
+
+      <div class="change-container">
+        <div class="change-display" id="grandTotal"></div>
+      </div>
+
+      <div class="cash-input">
+        <label for="cashGiven">Betrag gegeben</label>
+        <input type="number" id="cashGiven" step="0.01" inputmode="decimal" placeholder="0,00" />
+        <span>€</span>
+      </div>
+
+      <div class="change-container">
+        <div class="change-display" id="changeDisplay"></div>
+      </div>
+
+      <button class="reset-all-btn" id="resetAllButton">Gesamte Bestellung auf 0</button>
+    </div>
   </div>
 
-  <!-- Rückgeld / Fehlbetrag (rechtsbündig) -->
-  <div class="change-container">
-    <div class="change-display" id="changeDisplay"></div>
-  </div>
+  <script>
+  /* Daten (unverändert) */
+  let drinks = [
+    { name: "Pils", price: 2.50, quantity: 0, color: "#FFF4B1", imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", addOns: [] },
+    { name: "Kölsch", price: 2.50, quantity: 0, color: "#D4FFB2", imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", addOns: [] },
+    { name: "Fassbrause Zitrone", price: 2.50, quantity: 0, color: "#FFFBC0", imgUrl: "https://www.mrspeedy.de/cdn/shop/products/20345659_digital-image.webp?v=1664024806", addOns: [] },
+    { name: "Cola", price: 2.50, quantity: 0, color: "#FFDAD4", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", addOns: [] },
+    { name: "Cola Zero", price: 2.50, quantity: 0, color: "#E8D6FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/9/93/Coca_Cola-zero_Logo_300dpi.jpg", addOns: [] },
+    { name: "Limo", price: 2.50, quantity: 0, color: "#FFEAB0", imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", addOns: [] },
+    { name: "Sprite", price: 2.50, quantity: 0, color: "#D4F8FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", addOns: [] },
+    { name: "Apfelschorle", price: 2.50, quantity: 0, color: "#FFEFD0", imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", addOns: [] },
+    { name: "Wasser", price: 2.50, quantity: 0, color: "#CCE7FF", imgUrl: "https://cdn.metro-group.com/de/de_pim_459260002002_02.png?w=400&h=400&mode=pad", addOns: [] },
+    { name: "Pils 0,0 %", price: 2.50, quantity: 0, color: "#FFDEFC", imgUrl: "https://onlinedurst.de/media/image/d4/f4/a2/43563_bitb_pils_033l_72dpi_rgb.jpg", addOns: [] },
+    { name: "Kölsch 0,0 %", price: 2.50, quantity: 0, color: "#D8FFD8", imgUrl: "https://img.rewe-static.de/3274667/38179040_digital-image.png", addOns: [] },
+    { name: "Capri-Sun", price: 0.50, quantity: 0, color: "#FFD1FF", imgUrl: "https://www.neue-verpackung.de/assets/images/0/21-07-01%20Capri-Sun%20Orange%20mit%20Papierhalm-7d642310.jpg", addOns: [] },
+    { name: "Jägermeister", price: 2.00, quantity: 0, color: "#FAD6FF", imgUrl: "https://cdn02.plentymarkets.com/t4l5octwuee2/item/images/888095/full/4067700026668-Jaegermeister-Kraeuterlikoer-3000ml.jpg", addOns: [] },
+    { name: "Feigling", price: 2.00, quantity: 0, color: "#D1D1FF", imgUrl: "https://www.getraenke-handel.com/images/product_images/popup_images/Kleiner-Feigling-2-cl.jpg", addOns: [] },
+    { name: "Flimm", price: 2.00, quantity: 0, color: "#FFD1C1", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/03/Flimm-Waldmeister-07L-Flasche-K%C3%B6lner-Lik%C3%B6r-Waldmeisterlik%C3%B6r-kaufen-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
+    { name: "Bärbel", price: 2.00, quantity: 0, color: "#D1FFF5", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/04/Flimm-B%C3%A4rbelchen-Lik%C3%B6r-K%C3%B6ln-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
+    { name: "Aperol Spritz", price: 6.50, quantity: 0, color: "#FFE5B4", imgUrl: "https://spirituosenworld.de/images/cocktails/aperol-spritz-longdrink-2019.jpg", addOns: [] },
+    /* ---------- Speisen ---------- */
+    { name: "Pommes",                price: 3.50, quantity: 0, color: "#FFD700", imgUrl: "https://www.citynews-koeln.de/wp-content/uploads/2016/03/754980_original_R_K_B_by_Tim-Reckmann_pixelio.de_.jpg",     addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Currysauce",            price: 0.50, quantity: 0, color: "#FF8C00", imgUrl: "https://nicostanitzok.de/wp-content/uploads/2023/01/currywurst_rezept_currysauce_currysosse_selber_machen-2.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Bratwurst im Brötchen", price: 3.50, quantity: 0, color: "#8B4513", imgUrl: "https://t4.ftcdn.net/jpg/00/62/49/51/360_F_62495158_ZxAaidtgVGqOvEQK5UWdu6nY8NoWPZPo.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Krakauer im Brötchen",  price: 4.50, quantity: 0, color: "#800000", imgUrl: "https://www.bigtrailie.co.uk/index.php?media/krakauer-im-broetchen.70/full", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Bratwurst mit Fritten", price: 6.50, quantity: 0, color: "#B5651D", imgUrl: "https://live.staticflickr.com/4359/35616258953_d8b4594b5b_b.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Currywurst mit Fritten",price: 7.00, quantity: 0, color: "#FF4500", imgUrl: "https://d569htemax5yg.cloudfront.net/catalog/product/p/2/p2g5533_3.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    { name: "Krakauer mit Fritten",  price: 7.00, quantity: 0, color: "#A52A2A", imgUrl: "https://www.fokus-fleisch.de/assets/uploads/images/_1280xAUTO_crop_center-center_none/Currywurst_web_xs.jpeg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
+    /* ---------- Eis ---------- */
+    { name: "Cornetto Erdbeere/Schoko", price: 1.5, quantity: 0, color: "#FFF4B1", imgUrl: "https://assets.unileversolutions.com/v1/90238095.png", addOns: [] },
+    { name: "Big Sandwich", price: 2.0, quantity: 0, color: "#D4FFB2", imgUrl: "https://laserstar.rocks/media/32/84/f3/1636544061/31016232_big-sandwich.jpg?ts=1647526171", addOns: [] },
+    { name: "Kaktus", price: 1.0, quantity: 0, color: "#FFEAB0", imgUrl: "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcST9GDiNe5HScZw-UHnaVPKC6CyBwh0tmxkPnJArBrt15g0_4Qk0aNrh4lE3BW6YUr24O18yPHQwSQKsbUHErHCF6v6VwSEUw", addOns: [] },
+    { name: "BumBum", price: 2.0, quantity: 0, color: "#D4F8FF", imgUrl: "https://www.froneri-schoeller.de/images/default-source/produkte/31024921_schoeller-bum-bum.jpg?sfvrsn=eec4eaf8_0", addOns: [] },
+    { name: "Calippo", price: 2.0, quantity: 0, color: "#FFEFD0", imgUrl: "https://onkelseis.de/media/image/product/313/md/langnese-calippo-lime.jpg", addOns: [] }
+  ]; 
 
+  // Kategorien zuweisen
+  const eisNames = new Set(["Cornetto Erdbeere/Schoko","Big Sandwich","Kaktus","BumBum","Calippo"]);
+  const speisenNames = new Set(["Pommes","Currysauce","Bratwurst im Brötchen","Krakauer im Brötchen","Bratwurst mit Fritten","Currywurst mit Fritten","Krakauer mit Fritten"]);
+  drinks.forEach(d=>{ if(eisNames.has(d.name)) d.category='Eis'; else if(speisenNames.has(d.name)) d.category='Speisen'; else d.category='Getränke'; });
 
-  <!-- Reset-Button -->
-  <button class="reset-all-btn" id="resetAllButton">Gesamte Bestellung auf 0</button>
-</div>
+  let preparedStates = {};
 
-<script>
-/*
-  Artikel mit Farb-Attribut (color).
-  Rückgabe-Artikel haben negative Preise.
-  Wir unterscheiden Hauptartikel und Add-ons:
-  - Hauptartikel wird bei Menge > 0 mit drink.color hinterlegt.
-  - Add-ons bei Menge > 0 bekommen ein abweichendes Grau (statt drink.color).
-*/
-let drinks = [
-  { name: "Pils", price: 2.50, quantity: 0, color: "#FFF4B1", imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", addOns: [] },
-  { name: "Kölsch", price: 2.50, quantity: 0, color: "#D4FFB2", imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", addOns: [] },
-  { name: "Fassbrause Zitrone", price: 2.50, quantity: 0, color: "#FFFBC0", imgUrl: "https://www.mrspeedy.de/cdn/shop/products/20345659_digital-image.webp?v=1664024806", addOns: [] },
-  { name: "Cola", price: 2.50, quantity: 0, color: "#FFDAD4", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", addOns: [] },
-  { name: "Cola Zero", price: 2.50, quantity: 0, color: "#E8D6FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/9/93/Coca_Cola-zero_Logo_300dpi.jpg", addOns: [] },
-  { name: "Limo", price: 2.50, quantity: 0, color: "#FFEAB0", imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", addOns: [] },
-  { name: "Sprite", price: 2.50, quantity: 0, color: "#D4F8FF", imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", addOns: [] },
-  { name: "Apfelschorle", price: 2.50, quantity: 0, color: "#FFEFD0", imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", addOns: [] },
-  { name: "Wasser", price: 2.50, quantity: 0, color: "#CCE7FF", imgUrl: "https://cdn.metro-group.com/de/de_pim_459260002002_02.png?w=400&h=400&mode=pad", addOns: [] },
-  { name: "Pils 0,0 %", price: 2.50, quantity: 0, color: "#FFDEFC", imgUrl: "https://onlinedurst.de/media/image/d4/f4/a2/43563_bitb_pils_033l_72dpi_rgb.jpg", addOns: [] },
-  { name: "Kölsch 0,0 %", price: 2.50, quantity: 0, color: "#D8FFD8", imgUrl: "https://img.rewe-static.de/3274667/38179040_digital-image.png", addOns: [] },
-  { name: "Capri-Sun", price: 0.50, quantity: 0, color: "#FFD1FF", imgUrl: "https://www.neue-verpackung.de/assets/images/0/21-07-01%20Capri-Sun%20Orange%20mit%20Papierhalm-7d642310.jpg", addOns: [] },
-  { name: "Jägermeister", price: 2.00, quantity: 0, color: "#FAD6FF", imgUrl: "https://cdn02.plentymarkets.com/t4l5octwuee2/item/images/888095/full/4067700026668-Jaegermeister-Kraeuterlikoer-3000ml.jpg", addOns: [] },
-  { name: "Feigling", price: 2.00, quantity: 0, color: "#D1D1FF", imgUrl: "https://www.getraenke-handel.com/images/product_images/popup_images/Kleiner-Feigling-2-cl.jpg", addOns: [] },
-  { name: "Flimm", price: 2.00, quantity: 0, color: "#FFD1C1", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/03/Flimm-Waldmeister-07L-Flasche-K%C3%B6lner-Lik%C3%B6r-Waldmeisterlik%C3%B6r-kaufen-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
-  { name: "Bärbel", price: 2.00, quantity: 0, color: "#D1FFF5", imgUrl: "https://www.rheinspirits.com/wp-content/uploads/2020/04/Flimm-B%C3%A4rbelchen-Lik%C3%B6r-K%C3%B6ln-Rheinspirits-K%C3%B6lner-Spirituosen.jpg", addOns: [] },
-  { name: "Aperol Spritz", price: 6.50, quantity: 0, color: "#FFE5B4", imgUrl: "https://spirituosenworld.de/images/cocktails/aperol-spritz-longdrink-2019.jpg.pagespeed.ce.FE0Eb-GR-R.jpgg", addOns: [] },
-  /* ---------- Speisen ---------- */
-  { name: "Pommes",                price: 3.50, quantity: 0, color: "#FFD700", imgUrl: "https://www.citynews-koeln.de/wp-content/uploads/2016/03/754980_original_R_K_B_by_Tim-Reckmann_pixelio.de_.jpg",     addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Currysauce",            price: 0.50, quantity: 0, color: "#FF8C00", imgUrl: "https://nicostanitzok.de/wp-content/uploads/2023/01/currywurst_rezept_currysauce_currysosse_selber_machen-2.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Braten im Brötchen",    price: 3.50, quantity: 0, color: "#8B4513", imgUrl: "https://as2.ftcdn.net/jpg/00/33/12/63/1000_F_33126338_UQWWrNXV6xjXUd7AhOKtPh4Gs4VsDIJX.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Krakauer im Brötchen",  price: 4.50, quantity: 0, color: "#800000", imgUrl: "https://www.bigtrailie.co.uk/index.php?media/krakauer-im-broetchen.70/full", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Bratwurst mit Fritten", price: 6.50, quantity: 0, color: "#B5651D", imgUrl: "https://live.staticflickr.com/4359/35616258953_d8b4594b5b_b.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Currywurst mit Fritten",price: 7.00, quantity: 0, color: "#FF4500", imgUrl: "https://d569htemax5yg.cloudfront.net/catalog/product/p/2/p2g5533_3.jpg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] },
-  { name: "Krakauer mit Fritten",  price: 7.00, quantity: 0, color: "#A52A2A", imgUrl: "https://www.fokus-fleisch.de/assets/uploads/images/_1280xAUTO_crop_center-center_none/Currywurst_web_xs.jpeg", addOns: [{ name: "Ketchup", price: 0.00, quantity: 0, color:  "#e86b6b"},{ name: "Mayo",  price: 0.00, quantity: 0, color: "#F0E1B8" },{ name: "Senf",  price: 0.00, quantity: 0,  color: "#FFF0B2" }] }
+  const mainContent     = document.getElementById('mainContent');
+  const drinkContainer  = document.getElementById('drinkContainer');
+  const summarySection  = document.getElementById('summarySection');
+  const summaryListEl   = document.getElementById('summaryList');
+  const summaryContent  = document.getElementById('summaryContent');
+  const grandTotalEl    = document.getElementById('grandTotal');
+  const grandTotalMini  = document.getElementById('grandTotalMini');
+  const resetAllBtn     = document.getElementById('resetAllButton');
+  const cashGivenInput  = document.getElementById('cashGiven');
+  const changeDisplayEl = document.getElementById('changeDisplay');
+  const summaryToggle   = document.getElementById('summaryToggle');
+  const categoryBar    = document.getElementById('categoryBar');
 
-];
+  let tileElements = [];
 
+  // Hilfsfunktionen: Kontrastfarbe basierend auf Hintergrund
+  function hexToRgb(hex){
+    if(!hex) return {r:255,g:255,b:255};
+    let c = hex.replace('#','');
+    if(c.length===3){ c = c.split('').map(x=>x+x).join(''); }
+    const num = parseInt(c,16);
+    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+  }
+  function relativeLuminance(r,g,b){
+    const srgb = [r,g,b].map(v=>{ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+  }
+  function getTextColor(hex){
+    const {r,g,b} = hexToRgb(hex||'#ffffff');
+    const L = relativeLuminance(r,g,b);
+    const contrastBlack = (L + 0.05) / 0.05; // schwarz L=0
+    const contrastWhite = 1.05 / (L + 0.05); // weiß L=1
+    return (contrastWhite > contrastBlack) ? '#fff' : '#111';
+  }
 
-
-/* Häkchenzustand pro Tabellenzeile (fertig oder nicht) */
-let preparedStates = {};
-
-const mainContent     = document.getElementById('mainContent');
-const drinkContainer  = document.getElementById('drinkContainer');
-const summarySection  = document.getElementById('summarySection');
-const summaryListEl   = document.getElementById('summaryList');
-const grandTotalEl    = document.getElementById('grandTotal');
-const resetAllBtn     = document.getElementById('resetAllButton');
-const cashGivenInput  = document.getElementById('cashGiven');
-const changeDisplayEl = document.getElementById('changeDisplay');
-
-let tileElements = [];
-
-/* Kacheln einmalig erzeugen */
-function initializeTiles() {
-  drinks.forEach((drink) => {
-    const tile = document.createElement('div');
-    tile.classList.add('drink-tile');
-
-    // Bild
-    const img = document.createElement('img');
-    img.src = drink.imgUrl;
-    img.alt = drink.name;
-    tile.appendChild(img);
-
-    // Titel
-    const title = document.createElement('h2');
-    title.textContent = drink.name;
-    tile.appendChild(title);
-
-    // Preis
-    const priceInfo = document.createElement('p');
-    tile.appendChild(priceInfo);
-
-    // Menge (fett, größer)
-    const quantityInfo = document.createElement('p');
-    quantityInfo.classList.add('quantity-display');
-    tile.appendChild(quantityInfo);
-
-    // Steuer-Buttons
-    const controls = document.createElement('div');
-    controls.classList.add('quantity-controls');
-    tile.appendChild(controls);
-
-    // 0
-    const zeroBtn = document.createElement('button');
-    zeroBtn.textContent = "0";
-    zeroBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      drink.quantity = 0;
-      if (drink.addOns) {
-        drink.addOns.forEach(a => a.quantity = 0);
-      }
-      updateView();
+  let selectedCategory = 'Alle';
+  function buildCategoryBar(){
+    const categories = ['Alle', ...Array.from(new Set(drinks.map(d=>d.category)))];
+    categoryBar.innerHTML = '';
+    categories.forEach(cat=>{
+      const btn = document.createElement('button');
+      btn.type='button'; btn.className='category-btn'; btn.textContent=cat;
+      btn.setAttribute('aria-pressed', cat===selectedCategory ? 'true' : 'false');
+      btn.addEventListener('click', ()=>{
+        selectedCategory = cat;
+        categoryBar.querySelectorAll('.category-btn').forEach(b=> b.setAttribute('aria-pressed', b.textContent===selectedCategory ? 'true' : 'false'));
+        applyCategoryFilter();
+      });
+      categoryBar.appendChild(btn);
     });
-    controls.appendChild(zeroBtn);
-
-    // -1
-    const minusBtn = document.createElement('button');
-    minusBtn.textContent = "-1";
-    minusBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (drink.quantity > 0) {
-        drink.quantity--;
-        updateView();
-      }
+  }
+  function applyCategoryFilter(){
+    tileElements.forEach(({drink, tile})=>{
+      const show = (selectedCategory==='Alle') || (drink.category===selectedCategory);
+      tile.style.display = show ? '' : 'none';
     });
-    controls.appendChild(minusBtn);
+    adjustLayout();
+  }
 
-    // +5
-    const plus5Btn = document.createElement('button');
-    plus5Btn.textContent = "+5";
-    plus5Btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      drink.quantity += 5;
-      updateView();
-    });
-    controls.appendChild(plus5Btn);
+  function initializeTiles(){
+    drinks.forEach((drink) => {
+      const tile = document.createElement('div');
+      tile.classList.add('drink-tile');
+      tile.style.borderColor = drink.color;
+      tile.setAttribute('role','button');
+      tile.setAttribute('aria-label', `${drink.name} hinzufügen`);
+      tile.tabIndex = 0;
 
+      const media = document.createElement('div'); media.classList.add('tile-media');
+      const img = document.createElement('img');
+      img.src = drink.imgUrl; img.alt = drink.name; img.loading = 'lazy'; img.decoding = 'async';
+      img.onerror = () => { img.style.display = 'none'; };
+      media.appendChild(img);
+      tile.appendChild(media);
 
+      const title = document.createElement('h2');
+      title.textContent = drink.name; tile.appendChild(title);
 
-    // Klick auf die Kachel => +1
-    tile.addEventListener('click', () => {
-      drink.quantity++;
-      updateView();
-    });
+      const priceInfo = document.createElement('p'); priceInfo.classList.add('price'); tile.appendChild(priceInfo);
+      const quantityInfo = document.createElement('p'); quantityInfo.classList.add('quantity-display'); tile.appendChild(quantityInfo);
 
-    // Add-ons
-    const addonElements = [];
-    if (drink.addOns && drink.addOns.length > 0) {
-      const addonsContainer = document.createElement('div');
-      addonsContainer.classList.add('addons-container');
-      tile.appendChild(addonsContainer);
+      const controls = document.createElement('div'); controls.classList.add('quantity-controls'); tile.appendChild(controls);
 
-      drink.addOns.forEach((addon) => {
-        const addonTile = document.createElement('div');
-        addonTile.classList.add('addon-tile');
-        addonTile.style.borderColor = addon.color;
+      const zeroBtn = document.createElement('button'); zeroBtn.textContent = '0';
+      zeroBtn.addEventListener('click', (e)=>{ e.stopPropagation(); drink.quantity = 0; if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0);} updateView(); });
+      controls.appendChild(zeroBtn);
 
-        // Klick => +1
-        addonTile.addEventListener('click', (e) => {
-          e.stopPropagation();
-          addon.quantity++;
-          updateView();
+      const minusBtn = document.createElement('button'); minusBtn.textContent='-1';
+      minusBtn.addEventListener('click', (e)=>{ e.stopPropagation(); if(drink.quantity>0){ drink.quantity--; updateView(); }});
+      controls.appendChild(minusBtn);
+
+      const plus5Btn = document.createElement('button'); plus5Btn.textContent = '+5';
+      plus5Btn.addEventListener('click', (e)=>{ e.stopPropagation(); drink.quantity+=5; updateView(); });
+      controls.appendChild(plus5Btn);
+
+      // Tap/Klick auf die Kachel => +1
+      const inc = ()=>{ drink.quantity++; updateView(); if (navigator.vibrate) navigator.vibrate(10); };
+      tile.addEventListener('click', inc);
+      tile.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); inc(); }});
+
+      // Add-ons
+      const addonElements = [];
+      if (drink.addOns && drink.addOns.length){
+        const addonsContainer = document.createElement('div'); addonsContainer.classList.add('addons-container'); tile.appendChild(addonsContainer);
+        drink.addOns.forEach((addon)=>{
+          const addonTile = document.createElement('div'); addonTile.classList.add('addon-tile'); addonTile.style.borderColor = addon.color || '#999';
+          addonTile.addEventListener('click', (e)=>{ e.stopPropagation(); addon.quantity++; updateView(); if (navigator.vibrate) navigator.vibrate(8); });
+
+          const addonTitle = document.createElement('h3'); addonTile.appendChild(addonTitle);
+          const addonPrice = document.createElement('p'); addonTile.appendChild(addonPrice);
+          const addonQuantity = document.createElement('p'); addonTile.appendChild(addonQuantity);
+
+          const addonControls = document.createElement('div'); addonControls.classList.add('addon-controls'); addonTile.appendChild(addonControls);
+
+          const addonZeroBtn = document.createElement('button'); addonZeroBtn.textContent='0';
+          addonZeroBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); addon.quantity=0; updateView(); }); addonControls.appendChild(addonZeroBtn);
+
+          const addonMinusBtn = document.createElement('button'); addonMinusBtn.textContent='-1';
+          addonMinusBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); if(addon.quantity>0){ addon.quantity--; updateView(); }}); addonControls.appendChild(addonMinusBtn);
+
+          const alignBtn = document.createElement('button'); alignBtn.textContent='='; alignBtn.title='An Hauptgetränk angleichen';
+          alignBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); addon.quantity = drink.quantity; updateView(); }); addonControls.appendChild(alignBtn);
+
+          addonElements.push({ addon, addonTile, addonTitle, addonPrice, addonQuantity });
+          addonsContainer.appendChild(addonTile);
         });
+      }
 
-        // Titel, Preis, Menge
-        const addonTitle = document.createElement('h3');
-        addonTile.appendChild(addonTitle);
+      drinkContainer.appendChild(tile);
+      tileElements.push({ drink, tile, priceInfo, quantityInfo, addonElements });
+    });
+  }
 
-        const addonPrice = document.createElement('p');
-        addonTile.appendChild(addonPrice);
+  function updateView(){
+    tileElements.forEach(el=>{
+      const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
+      priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Rückgabe)" : drink.price.toFixed(2)+" €").replace('.', ',');
+      quantityInfo.textContent = "Menge: " + drink.quantity;
 
-        const addonQuantity = document.createElement('p');
-        addonTile.appendChild(addonQuantity);
+      tile.style.borderColor = drink.color;
+      if(drink.quantity>0){ tile.classList.add('active'); tile.style.backgroundColor = drink.color;
+        tile.style.color = getTextColor(drink.color); }
+      else{ tile.classList.remove('active'); tile.style.backgroundColor = '#fff';
+        tile.style.color = '#111'; }
 
-        // Steuerung: -1, ≈, 0
-        const addonControls = document.createElement('div');
-        addonControls.classList.add('addon-controls');
-        addonTile.appendChild(addonControls);
+      addonElements.forEach(ae=>{
+        const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
+        addonTitle.textContent = addon.name;
+        addonPrice.textContent = (addon.price !== 0 ? addon.price.toFixed(2)+" €" : "–").replace('.', ',');
+        addonQuantity.textContent = "x " + addon.quantity;
+        addonTile.style.borderColor = addon.color || '#999';
+        addonTile.style.backgroundColor = addon.quantity>0 ? (addon.color || '#eee') : '#fff';
+        addonTile.style.color = addon.quantity>0 ? getTextColor(addon.color || '#eee') : '#111';
+      });
+    });
+    updateSummary();
+  }
 
-        const addonZeroBtn = document.createElement('button');
-        addonZeroBtn.textContent = "0";
-        addonZeroBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          addon.quantity = 0;
-          updateView();
-        });
-        addonControls.appendChild(addonZeroBtn);
-
-        const addonMinusBtn = document.createElement('button');
-        addonMinusBtn.textContent = "-1";
-        addonMinusBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          if (addon.quantity > 0) {
-            addon.quantity--;
-            updateView();
+  function updateSummary(){
+    let rows = []; let total = 0;
+    drinks.forEach(drink=>{
+      let lineTotal = drink.quantity * drink.price; let addOnSum = 0; let addOnRows=[];
+      if(drink.addOns){
+        drink.addOns.forEach(addon=>{
+          if(addon.quantity!==0){
+            let addonLineTotal = addon.quantity * addon.price; addOnSum += addonLineTotal;
+            addOnRows.push({ name: '→ ' + addon.name, quantity: addon.quantity, price: addon.price, total: addonLineTotal, color: drink.color, rowID: 'addon-'+drink.name+'::'+addon.name });
           }
         });
-        addonControls.appendChild(addonMinusBtn);
-
-        const alignBtn = document.createElement('button');
-        alignBtn.textContent = "=";
-        alignBtn.title = "An Hauptgetränk angleichen";
-        alignBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          addon.quantity = drink.quantity;
-          updateView();
-        });
-        addonControls.appendChild(alignBtn);
-
-        addonElements.push({
-          addon,
-          addonTile,
-          addonTitle,
-          addonPrice,
-          addonQuantity
-        });
-
-        addonsContainer.appendChild(addonTile);
-      });
-    }
-
-    drinkContainer.appendChild(tile);
-
-    tileElements.push({
-      drink,
-      tile,
-      priceInfo,
-      quantityInfo,
-      addonElements
-    });
-  });
-}
-
-/* Inhalte aktualisieren */
-function updateView() {
-  // Kachel-Inhalte
-  tileElements.forEach(el => {
-    const { drink, tile, priceInfo, quantityInfo, addonElements } = el;
-
-    // Preis-Text
-    if (drink.price < 0) {
-      priceInfo.textContent = drink.price.toFixed(2).replace('.', ',') + " € (Rückgabe)";
-    } else {
-      priceInfo.textContent = drink.price.toFixed(2).replace('.', ',') + " €";
-    }
-
-    // Menge
-    quantityInfo.textContent = "Menge: " + drink.quantity;
-
-    // Farbliche Anpassung Hauptartikel:
-    tile.style.borderColor = drink.color;
-    if (drink.quantity > 0) {
-      tile.classList.add('active');
-      tile.style.backgroundColor = drink.color; 
-    } else {
-      tile.classList.remove('active');
-      tile.style.backgroundColor = "#fff"; /* Zurück zu weiß */
-    }
-
-    // Add-ons
-    addonElements.forEach(ae => {
-      const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
-      addonTitle.textContent = addon.name;
-
-      if (addon.price < 0) {
-        addonPrice.textContent = addon.price.toFixed(2).replace('.', ',') + " € (Rück)";
-      } else {
-        addonPrice.textContent = addon.price.toFixed(2).replace('.', ',') + " €";
       }
-      addonQuantity.textContent = "x " + addon.quantity;
-
-      // Abweichende Färbung bei Menge > 0 
-        addonTile.style.borderColor = addon.color || "#999";
-        if (addon.quantity > 0) {
-        addonTile.style.backgroundColor = addon.color;
-        } else {
-        addonTile.style.backgroundColor = "#fff";
-        }
+      if(drink.quantity!==0 || addOnSum!==0){
+        rows.push({ name: drink.name, quantity: drink.quantity, price: drink.price, total: lineTotal, color: drink.color, rowID: 'main-'+drink.name });
+        rows.push(...addOnRows);
+      }
+      total += lineTotal + addOnSum;
     });
-  });
-
-  // Zusammenfassung neu aufbauen
-  updateSummary();
-}
-
-/* Zusammenfassung (Tabelle) */
-function updateSummary() {
-  let rows = [];
-  let total = 0;
-
-  drinks.forEach(drink => {
-    let lineTotal = drink.quantity * drink.price;
-    let addOnSum  = 0;
-
-    let addOnRows = [];
-    if (drink.addOns) {
-      drink.addOns.forEach(addon => {
-        if (addon.quantity !== 0) {
-          let addonLineTotal = addon.quantity * addon.price;
-          addOnSum += addonLineTotal;
-          addOnRows.push({
-            name: "→ " + addon.name,
-            quantity: addon.quantity,
-            price: addon.price,
-            total: addonLineTotal,
-            color: drink.color,
-            rowID: "addon-" + drink.name + "::" + addon.name
-          });
-        }
-      });
-    }
-
-    if (drink.quantity !== 0 || addOnSum !== 0) {
-      rows.push({
-        name: drink.name,
-        quantity: drink.quantity,
-        price: drink.price,
-        total: lineTotal,
-        color: drink.color,
-        rowID: "main-" + drink.name
-      });
-      rows.push(...addOnRows);
-    }
-
-    total += lineTotal + addOnSum;
-  });
-
-  buildSummaryList(rows);
-  grandTotalEl.textContent =
-    "Summe: " + total.toFixed(2).replace('.', ',') + " €";
-  calculateChange(total);
-  adjustLayout();
-}
-
-/* Tabelle mit Checkboxen */
-function buildSummaryList(rows) {
-  if (rows.length === 0) {
-    summaryListEl.innerHTML = "<p>Keine Artikel ausgewählt.</p>";
-    return;
+    buildSummaryList(rows);
+    const totalText = ("Summe: " + total.toFixed(2).replace('.', ',') + " €");
+    grandTotalEl.textContent = totalText;
+    grandTotalMini.textContent = total.toFixed(2).replace('.', ',') + ' €';
+    calculateChange(total);
+    adjustLayout();
   }
 
-  let html = `
-    <table class="summary-table">
-      <thead>
-        <tr>
-          <th>Fertig?</th>
-          <th>Artikel</th>
-          <th>Menge</th>
-          <th>Einzelpreis</th>
-          <th>Gesamt</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
-
-  rows.forEach(r => {
-    let singlePrice = (r.price !== 0)
-      ? r.price.toFixed(2).replace('.', ',') + " €"
-      : "–";
-    let totalPrice = r.total.toFixed(2).replace('.', ',') + " €";
-    let isChecked  = preparedStates[r.rowID] === true ? "checked" : "";
-
-    html += `
-      <tr 
-        data-rowid="${r.rowID}"
-        style="background-color: ${r.color};"
-      >
-        <td>
-          <input
-            type="checkbox"
-            data-rowid="${r.rowID}"
-            ${isChecked}
-          />
-        </td>
-        <td>${r.name}</td>
-        <td>${r.quantity}</td>
-        <td>${singlePrice}</td>
-        <td>${totalPrice}</td>
-      </tr>
+  function buildSummaryList(rows){
+    if(rows.length===0){ summaryListEl.innerHTML = '<p style="padding:8px 10px;">Keine Artikel ausgewählt.</p>'; return; }
+    let html = `
+      <table class="summary-table" aria-label="Bestellübersicht">
+        <thead>
+          <tr>
+            <th>Fertig?</th>
+            <th>Artikel</th>
+            <th>Menge</th>
+            <th>Einzelpreis</th>
+            <th>Gesamt</th>
+          </tr>
+        </thead>
+        <tbody>
     `;
-  });
-
-  html += `</tbody></table>`;
-  summaryListEl.innerHTML = html;
-
-  // Checkbox-Listener
-  const checkboxes = summaryListEl.querySelectorAll('input[type="checkbox"]');
-  checkboxes.forEach(chk => {
-    chk.addEventListener('change', (e) => {
-      let rowID = e.target.dataset.rowid;
-      preparedStates[rowID] = e.target.checked;
+    rows.forEach(r=>{
+      let singlePrice = (r.price!==0) ? r.price.toFixed(2).replace('.', ',') + ' €' : '–';
+      let totalPrice  = r.total.toFixed(2).replace('.', ',') + ' €';
+      let isChecked   = preparedStates[r.rowID] === true ? 'checked' : '';
+      html += `
+        <tr data-rowid="${r.rowID}" style="background-color:${r.color}; color:${r.textColor || getTextColor(r.color)};">
+          <td><input type="checkbox" data-rowid="${r.rowID}" ${isChecked} /></td>
+          <td>${r.name}</td>
+          <td>${r.quantity}</td>
+          <td>${singlePrice}</td>
+          <td>${totalPrice}</td>
+        </tr>
+      `;
     });
-  });
-}
+    html += '</tbody></table>';
+    summaryListEl.innerHTML = html;
 
-/* Bargeld-Eingabe => Rückgeld / Fehlbetrag */
-function calculateChange(total) {
-  let cash = parseFloat(cashGivenInput.value);
-  if (isNaN(cash)) {
-    changeDisplayEl.textContent = "";
-    return;
+    summaryListEl.querySelectorAll('input[type="checkbox"]').forEach(chk=>{
+      chk.addEventListener('change', (e)=>{ let rowID = e.target.dataset.rowid; preparedStates[rowID] = e.target.checked; });
+    });
   }
-  let diff = cash - total;
-  if (diff >= 0) {
-    changeDisplayEl.textContent = "Rückgeld: " + diff.toFixed(2).replace('.', ',') + " €";
-  } else {
-    changeDisplayEl.textContent = "Fehlbetrag: " + Math.abs(diff).toFixed(2).replace('.', ',') + " €";
+
+  function calculateChange(total){
+    let cash = parseFloat((cashGivenInput.value||'').replace(',', '.'));
+    if(isNaN(cash)){ changeDisplayEl.textContent = ''; return; }
+    let diff = cash - total;
+    if(diff>=0){ changeDisplayEl.textContent = 'Rückgeld: ' + diff.toFixed(2).replace('.', ',') + ' €'; }
+    else{ changeDisplayEl.textContent = 'Fehlbetrag: ' + Math.abs(diff).toFixed(2).replace('.', ',') + ' €'; }
   }
-}
 
-/* Dynamischer Abstand für Hauptbereich (verhindert Überlappung) */
-function adjustLayout() {
-  const summaryHeight = summarySection.offsetHeight;
-  mainContent.style.paddingBottom = (summaryHeight + 10) + "px";
-}
+  function adjustLayout(){
+    // Abstand unten, damit die Kacheln nicht unter das Bottom‑Sheet laufen
+    const height = summarySection.classList.contains('collapsed') ? summarySection.querySelector('.summary-header').offsetHeight : summarySection.offsetHeight;
+    mainContent.style.paddingBottom = (height + 16) + 'px';
+  }
 
-/* Alles zurücksetzen */
-function resetAll() {
-  drinks.forEach(drink => {
-    drink.quantity = 0;
-    if (drink.addOns) {
-      drink.addOns.forEach(a => a.quantity = 0);
-    }
+  function resetAll(){
+    drinks.forEach(drink=>{ drink.quantity=0; if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0);} });
+    cashGivenInput.value = ''; preparedStates = {}; updateView();
+  }
+
+  function setCollapsed(collapsed){
+    summarySection.classList.toggle('collapsed', !!collapsed);
+    summaryToggle.setAttribute('aria-expanded', (!collapsed).toString());
+    adjustLayout();
+  }
+
+  // Init
+  window.addEventListener('load', ()=>{
+    initializeTiles(); updateView(); buildCategoryBar(); applyCategoryFilter();
+    // Mobile: standardmäßig einklappen
+    setCollapsed(false);
   });
-  cashGivenInput.value = "";
-  preparedStates = {};
-  updateView();
-}
 
-/* Init */
-window.addEventListener('load', () => {
-  initializeTiles();
-  updateView();
-});
-
-resetAllBtn.addEventListener('click', resetAll);
-
-cashGivenInput.addEventListener('input', () => {
-  let total = 0;
-  drinks.forEach(d => {
-    total += d.quantity * d.price;
-    if (d.addOns) {
-      d.addOns.forEach(a => {
-        total += a.quantity * a.price;
-      });
-    }
+  resetAllBtn.addEventListener('click', resetAll);
+  cashGivenInput.addEventListener('input', ()=>{
+    let total = 0; drinks.forEach(d=>{ total += d.quantity * d.price; if(d.addOns){ d.addOns.forEach(a=> total += a.quantity * a.price ); } });
+    calculateChange(total);
   });
-  calculateChange(total);
-});
-</script>
+  summaryToggle.addEventListener('click', ()=>{ setCollapsed(!summarySection.classList.contains('collapsed')); });
+
+  window.addEventListener('resize', adjustLayout);
+  </script>
 </body>
 </html>
