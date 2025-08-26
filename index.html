@@ -87,10 +87,11 @@
       width: 100%; max-width: var(--page-max); background:#fff; border-top:1px solid #ccc; box-shadow: 0 -6px 20px rgba(0,0,0,.18);
       max-height: 60vh; overflow: hidden; border-top-left-radius: 14px; border-top-right-radius: 14px;
       padding-bottom: env(safe-area-inset-bottom);
+      display:flex; flex-direction:column;
     }
 
     .summary-header{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; position:sticky; top:0; background:#fff; z-index:2; border-bottom:1px solid #eee;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; position:sticky; top:0; background:#fff; z-index:3; border-bottom:1px solid #eee; order:0; margin:0;
     }
     .summary-title{ display:flex; align-items:center; gap:8px; font-weight:700; }
     .summary-toggle{
@@ -100,7 +101,7 @@
     .summary-toggle .chevron{ transition: transform .2s ease; }
     .summary.collapsed .summary-toggle .chevron{ transform: rotate(-90deg); }
 
-    .summary-content{ padding: 10px 16px; overflow-y:auto; max-height: 50vh; }
+    .summary-content{ padding: 10px 16px; overflow-y:auto; max-height: 50vh; order:1; }
     .summary.collapsed .summary-content{ display:none; }
 
     .summary-items{ border:1px solid #ddd; border-radius: 10px; background:#fff; overflow:auto; margin-bottom:10px; }
@@ -148,6 +149,17 @@
     /* Einheitlicher Startpunkt für Text: fixer Bildbereich */
     .tile-media{ height: 96px; display:flex; align-items:center; justify-content:center; }
     .drink-tile{ overflow: hidden; }
+    .summary-header{ gap:10px; }
+    
+    
+    /* Nur der Toggle im Header darf sichtbar sein */
+    .summary .summary-toggle{ display:none; }
+    .summary > .summary-header .summary-toggle{ display:flex; }
+    /* Verhindere duplizierte Mini-Summe außerhalb des Headers */
+    #grandTotalMini{ display:none; } /* hide duplicates */
+    /* Entferne ggf. untere Geisterleiste */
+    .summary > .summary-content > .summary-toggle, .summary > .summary-content > #grandTotalMini{ display:none !important; }
+    .summary-header #grandTotalMini{ display:inline; }
   </style>
 </head>
 <body>
@@ -158,14 +170,20 @@
   </div>
 
   <div class="summary" id="summarySection" aria-live="polite">
+  <div class="summary" id="summarySection" aria-live="polite">
     <div class="summary-header">
       <button id="summaryToggle" class="summary-toggle" aria-expanded="true" aria-controls="summaryContent">
         <div class="summary-title">Übersicht <span style="opacity:.6">(Tippen zum Ein-/Ausklappen)</span></div>
         <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
       </button>
+      
+    </div>
+        <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
+      </button>
     </div>
 
-    <div class="summary-content" id="summaryContent">
+    <div class="summary-content" id="summaryContent" style="display:block;">
+      <div class="summary-content" id="summaryContent">
       <div class="summary-items" id="summaryList"></div>
 
       <div class="change-container">
@@ -180,10 +198,7 @@
 
       <div class="change-container">
         <div class="change-display" id="changeDisplay"></div>
-      </div>
-
-      <button class="reset-all-btn" id="resetAllButton">Gesamte Bestellung auf 0</button>
-    </div>
+      </div></div>
   </div>
 
   <script>
@@ -241,6 +256,7 @@
   const changeDisplayEl = document.getElementById('changeDisplay');
   const summaryToggle   = document.getElementById('summaryToggle');
   const categoryBar    = document.getElementById('categoryBar');
+  const resetAllBtnHeader = document.getElementById('resetAllButtonHeader');
 
   let tileElements = [];
 
@@ -469,6 +485,28 @@
     cashGivenInput.value = ''; preparedStates = {}; updateView();
   }
 
+  function ensureResetButtonInContent(){
+    const sc = document.getElementById('summaryContent');
+    if (sc && !document.getElementById('resetAllButton')){
+      const btn = document.createElement('button');
+      btn.className = 'reset-all-btn';
+      btn.id = 'resetAllButton';
+      btn.textContent = 'Gesamte Bestellung auf 0';
+      sc.appendChild(btn);
+      btn.addEventListener('click', resetAll);
+    }
+  }
+
+  function sanitizeSummary(){
+    // Nur eine Summary behalten
+    const summaries = document.querySelectorAll('.summary');
+    summaries.forEach((el, idx)=>{ if(idx>0) el.remove(); });
+    // Nur Toggle im Header erlauben
+    document.querySelectorAll('.summary-toggle').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
+    // Nur Mini-Summe im Header erlauben
+    document.querySelectorAll('#grandTotalMini').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
+  }
+
   function setCollapsed(collapsed){
     summarySection.classList.toggle('collapsed', !!collapsed);
     summaryToggle.setAttribute('aria-expanded', (!collapsed).toString());
@@ -478,16 +516,29 @@
   // Init
   window.addEventListener('load', ()=>{
     initializeTiles(); updateView(); buildCategoryBar(); applyCategoryFilter();
-    // Mobile: standardmäßig einklappen
+    // Header sicher vor den Inhalt setzen
+    const headerEl = document.querySelector('.summary-header');
+    const contentEl = document.getElementById('summaryContent');
+    const sectionEl = document.getElementById('summarySection');
+    if (sectionEl && headerEl && contentEl && headerEl.nextElementSibling !== contentEl) {
+      sectionEl.insertBefore(headerEl, contentEl);
+    }
+    ensureResetButtonInContent();
+    sanitizeSummary();
     setCollapsed(false);
   });
 
-  resetAllBtn.addEventListener('click', resetAll);
-  cashGivenInput.addEventListener('input', ()=>{
+  if (resetAllBtnHeader) resetAllBtnHeader.addEventListener('click', resetAll);
+  if (resetAllBtn)       resetAllBtn.addEventListener('click', resetAll);
+
+  if (cashGivenInput) cashGivenInput.addEventListener('input', ()=>{
     let total = 0; drinks.forEach(d=>{ total += d.quantity * d.price; if(d.addOns){ d.addOns.forEach(a=> total += a.quantity * a.price ); } });
     calculateChange(total);
   });
-  summaryToggle.addEventListener('click', ()=>{ setCollapsed(!summarySection.classList.contains('collapsed')); });
+
+  if (summaryToggle) summaryToggle.addEventListener('click', ()=>{
+    setCollapsed(!summarySection.classList.contains('collapsed'));
+  });
 
   window.addEventListener('resize', adjustLayout);
   </script>
