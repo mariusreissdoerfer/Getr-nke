@@ -164,6 +164,17 @@
     .summary-title{ white-space: nowrap; min-width:0; }
     .summary-hint{ opacity:.6; font-size:.85em; white-space:nowrap; }
     @media (max-width: 600px){ .summary-hint{ font-size:.75em; } }
+    /* Zeilen in der Übersicht sind klickbar */
+    .summary-table tbody tr{ cursor: pointer; }
+    /* Größeres Häkchen + blaue Markierung bei gesetzter Zeile */
+    .summary-table td:first-child{ width: 48px; }
+    .summary-table td:first-child input[type="checkbox"]{
+      transform: scale(1.35);
+      transform-origin: center;
+      width: 18px; height: 18px;
+      accent-color: #2563eb; /* Blau */
+    }
+    .summary-table tbody tr.row-checked{ box-shadow: inset 0 0 0 3px #2563eb; }
   </style>
 </head>
 <body>
@@ -545,6 +556,44 @@
   });
 
   window.addEventListener('resize', adjustLayout);
-  </script>
+    // Zeilenklick in der Übersicht: toggelt das Häkchen
+  if (summaryListEl) {
+    summaryListEl.addEventListener('click', function(e){
+      const tr = e.target.closest('tbody tr');
+      if (!tr) return;
+      if (e.target.closest('input, button, a, label')) return; // Interaktives nicht doppelt toggeln
+      const chk = tr.querySelector('input[type="checkbox"]');
+      if (!chk) return;
+      chk.checked = !chk.checked;
+      const rowID = chk.dataset.rowid || tr.dataset.rowid;
+      preparedStates[rowID] = chk.checked;
+      // Sofort Styles aktualisieren & Change-Event auslösen
+      tr.classList.toggle('row-checked', chk.checked);
+      chk.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  }
+  // --- Größeres Häkchen + Zeilen-Rahmen (blau) ---
+  function syncRowCheckedStyles(){
+    if(!summaryListEl) return;
+    summaryListEl.querySelectorAll('tbody tr').forEach(tr=>{
+      const chk = tr.querySelector('input[type="checkbox"]');
+      if(chk){ tr.classList.toggle('row-checked', chk.checked); }
+    });
+  }
+  // Delegierter Listener: reagiert auf Änderungen an Checkboxen
+  if (summaryListEl){
+    summaryListEl.addEventListener('change', function(e){
+      if(e.target && e.target.matches('input[type="checkbox"]')){
+        const tr = e.target.closest('tr');
+        if(tr){ tr.classList.toggle('row-checked', e.target.checked); }
+      }
+    });
+    // Beobachte DOM-Änderungen (nach rebuild der Tabelle)
+    const obs = new MutationObserver(()=>{ syncRowCheckedStyles(); });
+    obs.observe(summaryListEl, { childList: true });
+  }
+  // Erste Synchronisierung
+  syncRowCheckedStyles();
+</script>
 </body>
 </html>
