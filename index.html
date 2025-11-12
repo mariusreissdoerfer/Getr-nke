@@ -439,12 +439,20 @@ drinks.forEach(d => {
   const categoryBar    = document.getElementById('categoryBar');
   const resetAllBtnHeader = document.getElementById('resetAllButtonHeader');
   const COMPACT_KEY = 'compactMode';
-  if (localStorage.getItem(COMPACT_KEY) === '1') { document.body.classList.add('compact'); }
-  function setCompact(on){
-    document.body.classList.toggle('compact', !!on);
-    localStorage.setItem(COMPACT_KEY, document.body.classList.contains('compact') ? '1' : '0');
-    adjustLayout();
-  }
+
+  // Default = KOMPAKT (wenn noch nichts gespeichert ist)
+  const stored = localStorage.getItem(COMPACT_KEY);
+  const startCompact = (stored === null) ? true : stored === '1';
+  document.body.classList.toggle('compact', startCompact);
+
+// Layout an die gewählte Dichte anpassen
+adjustLayout();
+
+function setCompact(on){
+  document.body.classList.toggle('compact', !!on);
+  localStorage.setItem(COMPACT_KEY, document.body.classList.contains('compact') ? '1' : '0');
+  adjustLayout();
+}
 
   let tileElements = [];
 
