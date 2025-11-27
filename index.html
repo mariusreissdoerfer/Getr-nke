@@ -80,6 +80,11 @@
     .addon-tile p{ margin:0; font-size:.85em; }
     .addon-controls{ display:grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap:6px; justify-content:stretch; align-items:stretch; margin-top:6px; }
     .addon-controls button{ width:100%; min-width:0; min-height:44px; padding:8px 10px; border-radius:10px; border:1px solid #8a8a8a; background:#fafafa; font-size:1rem; cursor:pointer; }
+    .addon-quantity-big {
+      font-size: clamp(1rem, 3.2vw, 1.2rem); /* wie .quantity-display */
+      font-weight: 700;
+      margin-top: 4px;
+    }
 
     /* Zusammenfassung als Bottom‑Sheet */
     .summary{
@@ -276,34 +281,50 @@
   </div>
 
   <script>
-  /* Daten (unverändert) */
-/* ---------- Weihnachtsmarkt-Artikel ---------- */
+
+
+/* ---------- Weihnachtsmarkt-Artikel (aktualisiert) ---------- */
 let drinks = [
   { 
     name: "Glühwein Rot",
-    price: 4.00,
+    price: 5.00,
     quantity: 0,
     color: "#FFC8C8",
     imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
-    addOns: [{ name: "Schuss", price: 1.00, quantity: 0 }]
+    addOns: [
+      { name: "Amaretto", price: 1.00, quantity: 0 },
+      { name: "Rum",      price: 1.00, quantity: 0 },
+      { name: "Baileys",  price: 1.50, quantity: 0 }
+    ]
   },
   { 
     name: "Glühwein Weiß",
-    price: 4.00,
+    price: 5.00,
     quantity: 0,
     color: "#C8FFC8",
     imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
-    addOns: [{ name: "Schuss", price: 1.00, quantity: 0 }]
+    addOns: [
+      { name: "Amaretto", price: 1.00, quantity: 0 },
+      { name: "Rum",      price: 1.00, quantity: 0 },
+      { name: "Baileys",  price: 1.50, quantity: 0 }
+    ]
   },
   { 
-    name: "Kakao",
-    price: 3.00,
+    name: "Kinderpunsch",
+    price: 4.50,
     quantity: 0,
     color: "#C8C8FF",
-    imgUrl: "https://media.istockphoto.com/id/503259445/de/foto/schoko-milchshake-smoothie.jpg?s=612x612&w=0&k=20&c=xk0qTKY4lby7eIV4vR3qItvuBvOZp7D1x_UMFWAWrgQ=",
+    imgUrl: "https://www.gutekueche.at/storage/media/recipe/149998/conv/kinderpunsch-default.jpg",
+    addOns: []
+  },
+  { 
+    name: "Chocomel",
+    price: 4.50,
+    quantity: 0,
+    color: "#E0C8FF",
+    imgUrl: "https://www.buurtaal.de/wp-content/uploads/niederlaendische-chocomel-mit-sahne.jpg",
     addOns: [
-      { name: "Schuss", price: 1.00, quantity: 0 },
-      { name: "Sahne",  price: 0.50, quantity: 0 }
+      { name: "Sahne", price: 0.50, quantity: 0 }
     ]
   },
   { 
@@ -311,9 +332,11 @@ let drinks = [
     price: -2.00,
     quantity: 0,
     color: "#FEC8EC",
-    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg",
+    imgUrl: "https://fairu.news.at/9b27b5f3-eda5-4918-859d-ffc4e2138fdd/031458e7a2f5cb454d4ab7240e438d4568127d27.jpg?width=2560&focal=63-48-1&quality=90",
     addOns: []
   },
+
+  /* Bier & Softdrinks */
   { 
     name: "Pils",
     price: 3.00,
@@ -332,7 +355,7 @@ let drinks = [
   },
   { 
     name: "Wasser",
-    price: 2.00,
+    price: 2.50,
     quantity: 0,
     color: "#C8E8FF",
     imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg",
@@ -370,17 +393,11 @@ let drinks = [
     imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg",
     addOns: []
   },
-  { 
-    name: "Rückgabe Flasche",
-    price: -1.00,
-    quantity: 0,
-    color: "#FEFEC8",
-    imgUrl: "https://media.istockphoto.com/id/871091342/de/vektor/realistische-gr%C3%BCn-braun-gelb-oder-wei%C3%9F-leere-glas-bierflaschen-isoliert-auf-einem.jpg?s=612x612&w=0&k=20&c=8fd3FviszKZqBipBbPMZ1zUnAcRBRyD139RbVJsca9Q=",
-    addOns: []
-  },
+
+  /* Kannen */
   { 
     name: "Glühwein Rot Kanne",
-    price: 15.00,
+    price: 25.00,
     quantity: 0,
     color: "#C8FFE8",
     imgUrl: "https://www.testberichte.de/imgs/p_imgs_og/791447.jpg",
@@ -388,15 +405,15 @@ let drinks = [
   },
   { 
     name: "Glühwein Weiß Kanne",
-    price: 15.00,
+    price: 25.00,
     quantity: 0,
     color: "#FFE8C8",
     imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg",
     addOns: []
   },
   { 
-    name: "Kakao Kanne",
-    price: 12.00,
+    name: "Chocomel Kanne",
+    price: 20.00,
     quantity: 0,
     color: "#E8C8FF",
     imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg",
@@ -409,18 +426,46 @@ let drinks = [
     color: "#C8FEF0",
     imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
     addOns: []
+  },
+
+    /* Pfand / Rückgabe Tassen & Kannen */
+  { 
+    name: "Ausgabe leerer Tasse",
+    price: 2.00,
+    quantity: 0,
+    color: "#FFF0C8",
+    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg",
+    addOns: []
+  },
+
+  /* Essen */
+  { 
+    name: "Krakauer im Brötchen",
+    price: 4.50,
+    quantity: 0,
+    color: "#FFD0B0",
+    imgUrl: "https://c8.alamy.com/compde/b3pp6a/ein-krakauer-wurst-in-ein-brot-brotchen-mit-senf-auf-einem-pappteller-b3pp6a.jpg",
+    addOns: []
+  },
+  { 
+    name: "Bratwurst im Brötchen",
+    price: 4.00,
+    quantity: 0,
+    color: "#FFC0A0",
+    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUuWMsEJS_1qFWruGcCrfbt6h6nT7awUdTvw&s",
+    addOns: []
   }
 ];
 
-/* Kategorien für deine bestehende Kategorienleiste */
-const kanneNames    = new Set(["Glühwein Rot Kanne","Kakao Kanne","Glühwein Weiß Kanne"]);
-const rueckgabeNames= new Set(["Rückgabe Tasse","Rückgabe Flasche","Rückgabe Kanne"]);
+/* Kategorien für deine Kategorienleiste */
+
+const essenNames     = new Set(["Krakauer im Brötchen", "Bratwurst im Brötchen"]);
 
 drinks.forEach(d => {
-  if (kanneNames.has(d.name))       d.category = 'Kannen';
-  else if (rueckgabeNames.has(d.name)) d.category = 'Rückgabe';
-  else                               d.category = 'Getränke';
+  if (essenNames.has(d.name))     d.category = 'Essen';
+  else                                 d.category = 'Getränke';
 });
+
 
 
   let preparedStates = {};
@@ -564,30 +609,52 @@ function setCompact(on){
       // Add-ons
       const addonElements = [];
       if (drink.addOns && drink.addOns.length){
-        const addonsContainer = document.createElement('div'); addonsContainer.classList.add('addons-container'); tile.appendChild(addonsContainer);
+        const addonsContainer = document.createElement('div');
+        addonsContainer.classList.add('addons-container');
+        tile.appendChild(addonsContainer);
+
         drink.addOns.forEach((addon)=>{
-          const addonTile = document.createElement('div'); addonTile.classList.add('addon-tile'); addonTile.style.borderColor = addon.color || '#999';
-          addonTile.addEventListener('click', (e)=>{ e.stopPropagation(); addon.quantity++; updateView(); if (navigator.vibrate) navigator.vibrate(8); });
+          const addonTile = document.createElement('div');
+          addonTile.classList.add('addon-tile');
+          addonTile.style.borderColor = addon.color || '#999';
 
-          const addonTitle = document.createElement('h3'); addonTile.appendChild(addonTitle);
-          const addonPrice = document.createElement('p'); addonTile.appendChild(addonPrice);
-          const addonQuantity = document.createElement('p'); addonTile.appendChild(addonQuantity);
+          // Klick auf die Kachel: +1 Add-on
+          addonTile.addEventListener('click', (e)=>{
+            e.stopPropagation();
+            addon.quantity++;
+            updateView();
+            if (navigator.vibrate) navigator.vibrate(8);
+          });
 
-          const addonControls = document.createElement('div'); addonControls.classList.add('addon-controls'); addonTile.appendChild(addonControls);
+          const addonTitle = document.createElement('h3');
+          addonTile.appendChild(addonTitle);
 
-          const addonZeroBtn = document.createElement('button'); addonZeroBtn.textContent='0';
-          addonZeroBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); addon.quantity=0; updateView(); }); addonControls.appendChild(addonZeroBtn);
+          const addonPrice = document.createElement('p');
+          addonTile.appendChild(addonPrice);
 
-          const addonMinusBtn = document.createElement('button'); addonMinusBtn.textContent='-1';
-          addonMinusBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); if(addon.quantity>0){ addon.quantity--; updateView(); }}); addonControls.appendChild(addonMinusBtn);
+          const addonQuantity = document.createElement('p');
+          addonQuantity.classList.add('addon-quantity-big');
+          addonTile.appendChild(addonQuantity);
 
-          const alignBtn = document.createElement('button'); alignBtn.textContent='='; alignBtn.title='An Hauptgetränk angleichen';
-          alignBtn.addEventListener('click', (ev)=>{ ev.stopPropagation(); addon.quantity = drink.quantity; updateView(); }); addonControls.appendChild(alignBtn);
+          // Controls: nur noch "0"-Button zum Zurücksetzen
+          const addonControls = document.createElement('div');
+          addonControls.classList.add('addon-controls');
+          addonTile.appendChild(addonControls);
+
+          const addonZeroBtn = document.createElement('button');
+          addonZeroBtn.textContent = '0';
+          addonZeroBtn.addEventListener('click', (ev)=>{
+            ev.stopPropagation();
+            addon.quantity = 0;
+            updateView();
+          });
+          addonControls.appendChild(addonZeroBtn);
 
           addonElements.push({ addon, addonTile, addonTitle, addonPrice, addonQuantity });
           addonsContainer.appendChild(addonTile);
         });
       }
+
 
       drinkContainer.appendChild(tile);
       tileElements.push({ drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements });
