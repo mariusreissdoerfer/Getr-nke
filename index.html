@@ -20,6 +20,16 @@
       background:#424242; color:#111;
     }
 
+    a, a:link, a:visited, a:hover, a:active {
+      color: inherit !important;
+      text-decoration: none !important;
+    }
+
+    /* iOS erkennt Preise/Nummern als Links → neutralisieren */
+    meta[name=format-detection] {
+      content: "telephone=no";
+    }
+
     body{ font-size: clamp(15px, 1.6vw, 18px); line-height:1.35; }
 
     .main-content{
