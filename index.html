@@ -782,16 +782,23 @@ function resetAll(){
 }
 
 function ensureResetButtonInContent(){
-  const sc = document.getElementById('summaryContent');
-  if (sc && !document.getElementById('resetAllButton')){
-    const btn = document.createElement('button');
-    btn.className = 'reset-all-btn';
-    btn.id = 'resetAllButton';
-    btn.textContent = 'Gesamte Bestellung auf 0';
-    sc.appendChild(btn);
-    btn.addEventListener('click', resetAll);
-  }
+  const section = document.getElementById('summarySection');
+  if (!section) return;
+
+  // Wenn Reset-Button schon existiert → fertig
+  if (document.getElementById('resetAllButton')) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'reset-all-btn';
+  btn.id = 'resetAllButton';
+  btn.textContent = 'Gesamte Bestellung auf 0';
+  btn.addEventListener('click', resetAll);
+
+  // Am ENDE des gesamten Summary-Bereichs einfügen
+  section.appendChild(btn);
 }
+
+
 
 function buildSummaryBar(){
   const sc = document.getElementById('summaryContent');
@@ -826,7 +833,7 @@ window.addEventListener('load', ()=>{
   applyCategoryFilter();
 
   ensureResetButtonInContent();
-  setCollapsed(false);
+  setCollapsed(true);
 });
 
 if (cashGivenInput) cashGivenInput.addEventListener('input', ()=>{
