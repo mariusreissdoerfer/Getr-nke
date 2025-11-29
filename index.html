@@ -20,16 +20,6 @@
       background:#424242; color:#111;
     }
 
-    a, a:link, a:visited, a:hover, a:active {
-      color: inherit !important;
-      text-decoration: none !important;
-    }
-
-    /* iOS erkennt Preise/Nummern als Links → neutralisieren */
-    meta[name=format-detection] {
-      content: "telephone=no";
-    }
-
     body{ font-size: clamp(15px, 1.6vw, 18px); line-height:1.35; }
 
     .main-content{
@@ -180,7 +170,7 @@
       display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px;
       position:sticky; top:0;color:#111; background:#adadad; z-index:3; border-bottom:1px solid #eee; order:0; margin:0;
     }
-    .summary-title{ display:flex; align-items:center; gap:8px; font-weight:700; }
+    .summary-title{ display:flex; color:#111; align-items:center; gap:8px; font-weight:700; }
     .summary-toggle{
       display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
       background:transparent; border:0; padding:8px 0; cursor:pointer; font: inherit; text-align:left;
