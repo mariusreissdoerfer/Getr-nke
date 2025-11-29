@@ -10,7 +10,7 @@
       --radius: 12px;
       --shadow: 0 2px 10px rgba(0,0,0,.12);
       --tile-border: 6px;
-      --gap: 12px;
+      --gap: 6px;
     }
 
     *{ box-sizing: border-box; }
@@ -26,7 +26,7 @@
     /* Haupt-Container */
     .main-content{
       margin:0 auto; max-width: var(--page-max);
-      padding: 12px 16px 80px; /* Platz unten; wird via JS erweitert */
+      padding: 6px 6px 80px; /* Platz unten; wird via JS erweitert */
     }
 
     /* Grid für Kacheln – passt sich flexibel an */
@@ -43,10 +43,15 @@
 
     /* Kacheln (Touch‑freundlich) */
     .drink-tile{
-      position:relative; border-radius: var(--radius);
-      padding: 10px; text-align:center; user-select:none; cursor:pointer;
+      position:relative; 
+      border-radius: var(--radius);
+      padding: 10px; 
+      text-align:center; 
+      user-select:none; 
+      cursor:pointer;
       transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease;
-      box-shadow: var(--shadow); border: var(--tile-border) solid #d9d9de; background:#fff;
+      box-shadow: var(--shadow); border: var(--tile-border) solid #d9d9de; 
+      background:#fff;
       touch-action: manipulation; /* schnelles Click-Verhalten auf Mobilgeräten */
     }
     .drink-tile:focus-visible{ outline: 3px solid #2563eb; outline-offset: 2px; }
@@ -62,11 +67,15 @@
     .quantity-display{ font-weight:700; margin:.35em 0; font-size: clamp(1rem, 3.2vw, 1.2rem); }
     .price{ margin:.15em 0; font-size: .95em; color:#333; }
 
-    .quantity-controls{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:6px; flex-wrap:wrap; }
+    .quantity-controls{ display:flex; align-items:center; justify-content:center; gap:2px; margin-top:2px; flex-wrap:nowrap; }
     .quantity-controls button{
       font-size: clamp(1rem, 3.6vw, 1.15rem);
-      padding: 10px 14px; border-radius: 10px; border:1px solid #8a8a8a; background:#fafafa; cursor:pointer;
-      min-width: 48px; min-height: 44px; touch-action: manipulation;
+      padding: 1px 4px; 
+      border-radius: 10px; 
+      border:1px solid #8a8a8a; background:#fafafa; cursor:pointer;
+      min-width: 30px; 
+      min-height: 44px; 
+      touch-action: manipulation;
     }
     .quantity-controls button:active{ transform: translateY(1px); }
 
@@ -74,17 +83,79 @@
     .drink-tile.active{ box-shadow: 0 3px 14px rgba(0,0,0,.18); }
 
     /* Add-ons */
-    .addons-container{ margin-top:8px; border-top:1px solid #cfcfd4; padding-top:8px; display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:6px; }
-    .addon-tile{ display:block; width:100%; border:2px solid #999; border-radius: 10px; padding:6px 8px; margin:0; text-align:center; cursor:pointer; background:#fff; transition: background-color .25s ease; min-width:auto; word-break: break-word; }
-    .addon-tile h3{ margin:0 0 2px; font-size:.95em; }
-    .addon-tile p{ margin:0; font-size:.85em; }
-    .addon-controls{ display:grid; grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); gap:6px; justify-content:stretch; align-items:stretch; margin-top:6px; }
-    .addon-controls button{ width:100%; min-width:0; min-height:44px; padding:8px 10px; border-radius:10px; border:1px solid #8a8a8a; background:#fafafa; font-size:1rem; cursor:pointer; }
-    .addon-quantity-big {
-      font-size: clamp(1rem, 3.2vw, 1.2rem); /* wie .quantity-display */
-      font-weight: 700;
-      margin-top: 4px;
+    /* Add-ons: kompakt, Name oben, unten Zeile mit Menge/Preis/Button */
+    .addons-container{
+      margin-top:2px;
+      border-top:2px solid #cfcfd4;
+      padding-top:2px;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
     }
+
+    .addon-tile{
+      display:flex;
+      flex-direction:column;
+      align-items:center;         /* Wichtig: zentriert! */
+      justify-content:center;     /* Auch zentrieren */
+      width:100%;
+      border:2px solid #999;
+      border-radius:6px;
+      padding:2px 4px;            /* kompakter */
+      gap:0px;                    /* kein Abstand zwischen Titel + Zeile */
+      background:#fff;
+      cursor:pointer;
+      transition: background-color .25s ease;
+    }
+
+
+
+    /* Name des Add-ons in der ersten Zeile */
+    .addon-tile h3{
+      margin:0 0 2px 0;
+      font-size:.85em;
+      font-weight:600;
+    }
+
+    /* Untere Zeile: Menge – Preis – Button */
+    .addon-row{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:6px;
+      line-height:0.0;
+    }
+
+    /* Menge groß & fett wie bei den Eltern */
+    .addon-quantity-big{
+      font-size:1.3em;
+      font-weight:700;
+      line-height:0.0;
+    }
+
+    /* Preis etwas kleiner */
+    .addon-price{
+      font-size:.95em;
+      line-height:0.0;
+    }
+
+    /* 0-Button kompakt */
+    .addon-controls{
+      display:flex;
+    }
+
+    .addon-controls button{
+      min-width:32px;
+      min-height:28px;
+      padding:2px 2px;
+      border-radius:8px;
+      border:1px solid #8a8a8a;
+      background:#fafafa;
+      font-size:.8em;
+      cursor:pointer;
+    }
+
+
 
     /* Zusammenfassung als Bottom‑Sheet */
     .summary{
@@ -187,7 +258,7 @@
 
     body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
     @media (max-width: 560px){ body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
-    body.compact .drink-tile{ padding:8px; border-width:4px; }
+    body.compact .drink-tile{ padding:8px; border-width:8px; }
     body.compact .tile-media{ height:64px; }
     body.compact .price{ font-size:.85em; }
     body.compact .quantity-display{ display:none; }
@@ -292,9 +363,9 @@ let drinks = [
     color: "#FFC8C8",
     imgUrl: "https://img.freepik.com/vektoren-premium/gluehwein-in-einer-tasse-heisser-aromatischer-gluehwein-mit-zimt-orange-und-anis-winter-grusskarten-design-vektor-illustration_623474-868.jpg",
     addOns: [
-      { name: "Amaretto", price: 1.00, quantity: 0 },
-      { name: "Rum",      price: 1.00, quantity: 0 },
-      { name: "Baileys",  price: 1.50, quantity: 0 }
+      { name: "Amaretto", price: 1.00, quantity: 0, color: "#FFE4B5" },
+      { name: "Rum",      price: 1.00, quantity: 0, color: "#E0BBFF" },
+      { name: "Baileys",  price: 1.50, quantity: 0, color: "#CDEFFF" }
     ]
   },
   { 
@@ -304,9 +375,9 @@ let drinks = [
     color: "#C8FFC8",
     imgUrl: "https://c8.alamy.com/compde/r7mg4r/gluhwein-trinken-umrisse-gluhwein-trinken-vektor-symbol-fur-web-design-auf-weissem-hintergrund-r7mg4r.jpg",
     addOns: [
-      { name: "Amaretto", price: 1.00, quantity: 0 },
-      { name: "Rum",      price: 1.00, quantity: 0 },
-      { name: "Baileys",  price: 1.50, quantity: 0 }
+      { name: "Amaretto", price: 1.00, quantity: 0, color: "#FFE4B5" },
+      { name: "Rum",      price: 1.00, quantity: 0, color: "#E0BBFF" },
+      { name: "Baileys",  price: 1.50, quantity: 0, color: "#CDEFFF" }
     ]
   },
   { 
@@ -485,18 +556,14 @@ drinks.forEach(d => {
   const resetAllBtnHeader = document.getElementById('resetAllButtonHeader');
   const COMPACT_KEY = 'compactMode';
 
-  // Default = KOMPAKT (wenn noch nichts gespeichert ist)
-  const stored = localStorage.getItem(COMPACT_KEY);
-  const startCompact = (stored === null) ? true : stored === '1';
-  document.body.classList.toggle('compact', startCompact);
+  document.body.classList.add('compact');
+
 
 // Layout an die gewählte Dichte anpassen
 adjustLayout();
 
 function setCompact(on){
-  document.body.classList.toggle('compact', !!on);
-  localStorage.setItem(COMPACT_KEY, document.body.classList.contains('compact') ? '1' : '0');
-  adjustLayout();
+  // dauerhaft kompakt – keine Funktion mehr
 }
 
   let tileElements = [];
@@ -544,24 +611,6 @@ function setCompact(on){
       tile.style.display = show ? '' : 'none';
     });
     adjustLayout();
-  }
-  function buildDensityToggle(){
-    if(!categoryBar) return;
-    const old = document.getElementById('densityToggle');
-    if(old) old.remove();
-    const densityBtn = document.createElement('button');
-    densityBtn.id = 'densityToggle';
-    densityBtn.type='button';
-    densityBtn.className='category-btn density-toggle';
-    const setLabel = ()=>{
-      const compactOn = document.body.classList.contains('compact');
-      densityBtn.innerHTML = `<span class="density-icon" aria-hidden="true">▦</span>`; // Icon-only
-      densityBtn.setAttribute('aria-label', compactOn ? 'Kompaktmodus ist an – tippen zum Ausschalten' : 'Kompaktmodus ist aus – tippen zum Einschalten');
-      densityBtn.title = compactOn ? 'Kompaktmodus aus' : 'Kompaktmodus an';
-     };
-    setLabel();
-    densityBtn.addEventListener('click', ()=>{ setCompact(!document.body.classList.contains('compact')); setLabel(); });
-    categoryBar.appendChild(densityBtn);
   }
 
   function initializeTiles(){
@@ -629,17 +678,15 @@ function setCompact(on){
           const addonTitle = document.createElement('h3');
           addonTile.appendChild(addonTitle);
 
-          const addonPrice = document.createElement('p');
-          addonTile.appendChild(addonPrice);
+          // Untere Zeile: Menge – Preis – Button
+          const addonRow = document.createElement('div');
+          addonRow.classList.add('addon-row');
+          addonTile.appendChild(addonRow);
 
-          const addonQuantity = document.createElement('p');
-          addonQuantity.classList.add('addon-quantity-big');
-          addonTile.appendChild(addonQuantity);
-
-          // Controls: nur noch "0"-Button zum Zurücksetzen
+                    // Controls: nur noch "0"-Button zum Zurücksetzen
           const addonControls = document.createElement('div');
           addonControls.classList.add('addon-controls');
-          addonTile.appendChild(addonControls);
+          addonRow.appendChild(addonControls);
 
           const addonZeroBtn = document.createElement('button');
           addonZeroBtn.textContent = '0';
@@ -649,6 +696,14 @@ function setCompact(on){
             updateView();
           });
           addonControls.appendChild(addonZeroBtn);
+
+          const addonPrice = document.createElement('p');
+          addonPrice.classList.add('addon-price');
+          addonRow.appendChild(addonPrice);
+
+          const addonQuantity = document.createElement('p');
+          addonQuantity.classList.add('addon-quantity-big');
+          addonRow.appendChild(addonQuantity);
 
           addonElements.push({ addon, addonTile, addonTitle, addonPrice, addonQuantity });
           addonsContainer.appendChild(addonTile);
@@ -691,7 +746,7 @@ function setCompact(on){
         const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
         addonTitle.textContent = addon.name;
         addonPrice.textContent = (addon.price !== 0 ? addon.price.toFixed(2)+" €" : "–").replace('.', ',');
-        addonQuantity.textContent = "x " + addon.quantity;
+        addonQuantity.textContent = addon.quantity;
         addonTile.style.borderColor = addon.color || '#999';
         addonTile.style.backgroundColor = addon.quantity>0 ? (addon.color || '#eee') : '#fff';
         addonTile.style.color = addon.quantity>0 ? getTextColor(addon.color || '#eee') : '#111';
@@ -841,7 +896,6 @@ function setCompact(on){
 
     // Filter-/UI-Bars
     buildCategoryBar();
-    buildDensityToggle();
     applyCategoryFilter();
 
     // Header sicher über den Inhalt setzen
