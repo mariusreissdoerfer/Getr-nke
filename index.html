@@ -355,6 +355,14 @@ let drinks = [
     ]
   },
   { 
+    name: "Rückgabe Tasse",
+    price: -2.00,
+    quantity: 0,
+    color: "#FEC8EC",
+    imgUrl: "https://fairu.news.at/9b27b5f3-eda5-4918-859d-ffc4e2138fdd/031458e7a2f5cb454d4ab7240e438d4568127d27.jpg?width=2560&focal=63-48-1&quality=90",
+    addOns: []
+  },
+  { 
     name: "Kinderpunsch",
     price: 4.50,
     quantity: 0,
@@ -371,14 +379,6 @@ let drinks = [
     addOns: [
       { name: "Sahne", price: 0.50, quantity: 0 }
     ]
-  },
-  { 
-    name: "Rückgabe Tasse",
-    price: -2.00,
-    quantity: 0,
-    color: "#FEC8EC",
-    imgUrl: "https://fairu.news.at/9b27b5f3-eda5-4918-859d-ffc4e2138fdd/031458e7a2f5cb454d4ab7240e438d4568127d27.jpg?width=2560&focal=63-48-1&quality=90",
-    addOns: []
   },
   { name: "Pils", price: 3.00, quantity: 0, color: "#FFC8E8",
     imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", addOns: [] },
@@ -400,10 +400,10 @@ let drinks = [
     imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg", addOns: [] },
   { name: "Chocomel Kanne", price: 20.00, quantity: 0, color: "#E8C8FF",
     imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg", addOns: [] },
-  { name: "Rückgabe Kanne", price: -10.00, quantity: 0, color: "#C8FEF0",
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", addOns: [] },
   { name: "Ausgabe leerer Tasse", price: 2.00, quantity: 0, color: "#FFF0C8",
     imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", addOns: [] },
+  { name: "Rückgabe Kanne", price: -10.00, quantity: 0, color: "#C8FEF0",
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", addOns: [] },
   { name: "Krakauer im Brötchen", price: 4.50, quantity: 0, color: "#FFD0B0",
     imgUrl: "https://c8.alamy.com/compde/b3pp6a/ein-krakauer-wurst-in-ein-brot-brotchen-mit-senf-auf-einem-pappteller-b3pp6a.jpg", addOns: [] },
   { name: "Bratwurst im Brötchen", price: 4.00, quantity: 0, color: "#FFC0A0",
@@ -630,7 +630,7 @@ function initializeTiles(){
 function updateView(){
   tileElements.forEach(el=>{
     const { drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements } = el;
-    priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Rückgabe)" : drink.price.toFixed(2)+" €").replace('.', ',');
+    priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Pfand)" : drink.price.toFixed(2)+" €").replace('.', ',');
     quantityInfo.textContent = "Menge: " + drink.quantity;
 
     if (quantityBadge){
