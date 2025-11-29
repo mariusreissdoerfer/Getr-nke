@@ -20,16 +20,13 @@
       background:#f5f5f7; color:#111;
     }
 
-    /* Bessere Lesbarkeit auf allen Displays */
     body{ font-size: clamp(15px, 1.6vw, 18px); line-height:1.35; }
 
-    /* Haupt-Container */
     .main-content{
       margin:0 auto; max-width: var(--page-max);
-      padding: 6px 6px 80px; /* Platz unten; wird via JS erweitert */
+      padding: 6px 6px 80px;
     }
 
-    /* Grid für Kacheln – passt sich flexibel an */
     .drink-container{
       display:grid; gap: var(--gap);
       grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
@@ -41,108 +38,112 @@
       .drink-container{ grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
     }
 
-    /* Kacheln (Touch‑freundlich) */
     .drink-tile{
-      position:relative; 
+      position:relative;
       border-radius: var(--radius);
-      padding: 10px; 
-      text-align:center; 
-      user-select:none; 
+      padding: 10px;
+      text-align:center;
+      user-select:none;
       cursor:pointer;
       transition: background-color .25s ease, box-shadow .25s ease, border-color .25s ease;
-      box-shadow: var(--shadow); border: var(--tile-border) solid #d9d9de; 
+      box-shadow: var(--shadow); border: var(--tile-border) solid #d9d9de;
       background:#fff;
-      touch-action: manipulation; /* schnelles Click-Verhalten auf Mobilgeräten */
+      touch-action: manipulation;
     }
     .drink-tile:focus-visible{ outline: 3px solid #2563eb; outline-offset: 2px; }
 
     .drink-tile h2{ margin:.25em 0 .35em; font-size: clamp(1rem, 2.8vw, 1.25rem); }
 
     .drink-tile img{
-      max-width: 120px; max-height: 100%; height:auto; display:block; margin: 0 auto 6px;
-      object-fit: contain; border-radius: 8px;
+      max-width: 120px; max-height: 100%; height:auto; display:block;
+      margin: 0 auto 6px;
+      object-fit: contain;
+      border-radius: 8px;
     }
 
-    /* Menge/Preis */
     .quantity-display{ font-weight:700; margin:.35em 0; font-size: clamp(1rem, 3.2vw, 1.2rem); }
     .price{ margin:.15em 0; font-size: .95em; color:#333; }
 
-    .quantity-controls{ display:flex; align-items:center; justify-content:center; gap:2px; margin-top:2px; flex-wrap:nowrap; }
+    .quantity-controls{
+      display:flex; align-items:center; justify-content:center;
+      gap:2px; margin-top:2px; flex-wrap:nowrap;
+    }
     .quantity-controls button{
       font-size: clamp(1rem, 3.6vw, 1.15rem);
-      padding: 1px 4px; 
-      border-radius: 10px; 
+      padding: 1px 4px;
+      border-radius: 10px;
       border:1px solid #8a8a8a; background:#fafafa; cursor:pointer;
-      min-width: 30px; 
-      min-height: 44px; 
+      min-width: 30px;
+      min-height: 44px;
       touch-action: manipulation;
     }
     .quantity-controls button:active{ transform: translateY(1px); }
 
-    /* Aktive Kachel bekommt farbigen Hintergrund */
     .drink-tile.active{ box-shadow: 0 3px 14px rgba(0,0,0,.18); }
 
     /* Add-ons */
-    /* Add-ons: kompakt, Name oben, unten Zeile mit Menge/Preis/Button */
+    .addon-toggle{
+      margin-top:4px;
+      padding:8px 8px;
+      font-size:.85em;
+      border-radius:10px;
+      border:1px solid #aaa;
+      background:#fafafa;
+      cursor:pointer;
+      width: 126px;
+    }
+
     .addons-container{
-      margin-top:2px;
+      margin-top:4px;
       border-top:2px solid #cfcfd4;
       padding-top:2px;
-      display:flex;
+      display:none;                 /* standard: collapsed */
       flex-direction:column;
       gap:2px;
     }
+    .addons-container.open{ display:flex; }
 
     .addon-tile{
       display:flex;
       flex-direction:column;
-      align-items:center;         /* Wichtig: zentriert! */
-      justify-content:center;     /* Auch zentrieren */
+      align-items:center;
+      justify-content:center;
       width:100%;
       border:2px solid #999;
       border-radius:6px;
-      padding:2px 4px;            /* kompakter */
-      gap:0px;                    /* kein Abstand zwischen Titel + Zeile */
+      padding:2px 4px;
+      gap:0;
       background:#fff;
       cursor:pointer;
       transition: background-color .25s ease;
     }
 
-
-
-    /* Name des Add-ons in der ersten Zeile */
     .addon-tile h3{
       margin:0 0 2px 0;
       font-size:.85em;
       font-weight:600;
     }
 
-    /* Untere Zeile: Menge – Preis – Button */
     .addon-row{
       display:flex;
       align-items:center;
       justify-content:flex-end;
       gap:6px;
-      line-height:0.0;
+      line-height:0;
     }
 
-    /* Menge groß & fett wie bei den Eltern */
     .addon-quantity-big{
       font-size:1.3em;
       font-weight:700;
-      line-height:0.0;
+      line-height:0;
     }
 
-    /* Preis etwas kleiner */
     .addon-price{
       font-size:.95em;
-      line-height:0.0;
+      line-height:0;
     }
 
-    /* 0-Button kompakt */
-    .addon-controls{
-      display:flex;
-    }
+    .addon-controls{ display:flex; }
 
     .addon-controls button{
       min-width:32px;
@@ -155,19 +156,19 @@
       cursor:pointer;
     }
 
-
-
-    /* Zusammenfassung als Bottom‑Sheet */
+    /* Summary (Bottom Sheet) */
     .summary{
       position: fixed; left: 50%; bottom: 0; transform: translateX(-50%);
       width: 100%; max-width: var(--page-max); background:#fff; border-top:1px solid #ccc; box-shadow: 0 -6px 20px rgba(0,0,0,.18);
       max-height: 60vh; overflow: hidden; border-top-left-radius: 14px; border-top-right-radius: 14px;
       padding-bottom: env(safe-area-inset-bottom);
       display:flex; flex-direction:column;
+      z-index:1000;
     }
 
     .summary-header{
-      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; position:sticky; top:0; background:#fff; z-index:3; border-bottom:1px solid #eee; order:0; margin:0;
+      display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px;
+      position:sticky; top:0; background:#fff; z-index:3; border-bottom:1px solid #eee; order:0; margin:0;
     }
     .summary-title{ display:flex; align-items:center; gap:8px; font-weight:700; }
     .summary-toggle{
@@ -177,7 +178,9 @@
     .summary-toggle .chevron{ transition: transform .2s ease; }
     .summary.collapsed .summary-toggle .chevron{ transform: rotate(-90deg); }
 
-    .summary-content{ padding: 10px 16px; overflow-y:auto; max-height: 50vh; order:1; }
+    .summary-content{
+      padding: 10px 16px; overflow-y:auto; max-height: 50vh; order:1;
+    }
     .summary.collapsed .summary-content{ display:none; }
 
     .summary-items{ border:1px solid #ddd; border-radius: 10px; background:#fff; overflow:auto; margin-bottom:10px; }
@@ -185,7 +188,6 @@
     .summary-table th, .summary-table td{ text-align:left; padding:6px 8px; border-bottom:1px solid #eee; }
     .summary-table th{ background:#fafafa; position:sticky; top:0; z-index:1; }
 
-    .summary-row{ display:flex; justify-content:space-between; gap:10px; margin-bottom:8px; }
     #grandTotal{ font-size: clamp(1.25rem, 4vw, 2rem); font-weight:800; }
     #grandTotalMini{ font-weight:700; }
 
@@ -197,105 +199,88 @@
 
     .reset-all-btn{ padding: 12px 16px; cursor:pointer; border-radius: 12px; border:1px solid #7b7b7b; background:#d7fbd4; width:100%; font-size:1.05em; }
 
-    /* Mobile: Bottom‑Sheet standardmäßig eingeklappt */
     @media (max-width: 640px){
       .summary{ max-height: 70vh; }
     }
 
-    /* Bewegungen für Menschen mit eingeschränkter Bewegungseinstellung reduzieren */
     @media (prefers-reduced-motion: reduce){
       *{ transition: none !important; scroll-behavior: auto !important; }
     }
-    /* Tablet: volle Breite ausnutzen */
+
     @media (min-width: 640px) and (max-width: 1100px){
       :root{ --page-max: 100vw; }
       .main-content, .summary{ max-width: 100vw; }
       .summary{ border-top-left-radius: 0; border-top-right-radius: 0; }
     }
-    /* Desktop: volle Breite */
     @media (min-width: 1100px){
       :root{ --page-max: 100vw; }
       .main-content, .summary{ max-width: 100vw; }
     }
 
-    /* Kategorien-Leiste */
-    .category-bar{ position:sticky; top:0; z-index:3; background:#f5f5f7; padding:8px 0; display:flex; gap:8px; flex-wrap:wrap; row-gap:8px; }
+    .category-bar{
+      position:sticky; top:0; z-index:3;
+      background:#f5f5f7; padding:8px 0;
+      display:flex; gap:8px; flex-wrap:wrap; row-gap:8px;
+    }
     .category-btn{ border:1px solid #ccc; background:#fff; padding:8px 12px; border-radius:9999px; cursor:pointer; font-size:1rem; }
     .category-btn[aria-pressed="true"]{ background:#111; color:#fff; border-color:#111; }
-    /* Einheitlicher Startpunkt für Text: fixer Bildbereich */
-    .tile-media{ height: 96px; display:flex; align-items:center; justify-content:center; }
-    .drink-tile{ overflow: hidden; }
+
+    .tile-media{
+      height: 96px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow: hidden;        /* Bild kann nicht mehr rausgucken */
+    }
+
     .summary-header{ gap:10px; }
-    
-    
-    /* Nur der Toggle im Header darf sichtbar sein */
+
     .summary .summary-toggle{ display:none; }
     .summary > .summary-header .summary-toggle{ display:flex; }
-    /* Verhindere duplizierte Mini-Summe außerhalb des Headers */
-    #grandTotalMini{ display:none; } /* hide duplicates */
-    /* Entferne ggf. untere Geisterleiste */
-    .summary > .summary-content > .summary-toggle, .summary > .summary-content > #grandTotalMini{ display:none !important; }
+
+    #grandTotalMini{ display:none; }
     .summary-header #grandTotalMini{ display:inline; }
-    /* Kleinere, einzeilige Hinweis-Label im Header */
+
     .summary-title{ white-space: nowrap; min-width:0; }
     .summary-hint{ opacity:.6; font-size:.85em; white-space:nowrap; }
     @media (max-width: 600px){ .summary-hint{ font-size:.75em; } }
-    /* Zeilen in der Übersicht sind klickbar */
+
     .summary-table tbody tr{ cursor: pointer; }
-    /* Größeres Häkchen + blaue Markierung bei gesetzter Zeile */
     .summary-table td:first-child{ width: 48px; }
     .summary-table td:first-child input[type="checkbox"]{
       transform: scale(1.35);
       transform-origin: center;
       width: 18px; height: 18px;
-      accent-color: #2563eb; /* Blau */
+      accent-color: #2563eb;
     }
     .summary-table tbody tr.row-checked{ box-shadow: inset 0 0 0 3px #2563eb; }
-    /* --- Kompaktmodus & Zähler-Badge --- */
-    .quantity-badge{ position:absolute; top:6px; right:6px; z-index:1; display:none; align-items:center; justify-content:center; min-width: clamp(30px, 7vw, 44px); height: clamp(30px, 7vw, 44px); padding: 0 10px; border-radius:9999px; font-weight:800; font-size: clamp(1rem, 3.6vw, 1.35rem); line-height:1; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-    .density-toggle{ margin-left:auto; }
-    @media (max-width:480px){ .density-toggle{ font-size:.9em; padding:6px 10px; } }
+
+    .quantity-badge{
+      position:absolute; top:6px; right:6px; z-index:1;
+      display:none; align-items:center; justify-content:center;
+      min-width: clamp(30px, 7vw, 44px); height: clamp(30px, 7vw, 44px);
+      padding: 0 10px; border-radius:9999px; font-weight:800;
+      font-size: clamp(1rem, 3.6vw, 1.35rem); line-height:1;
+      box-shadow: 0 1px 4px rgba(0,0,0,.25);
+    }
 
     body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-    @media (max-width: 560px){ body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); } }
+    @media (max-width: 560px){
+      body.compact .drink-container{ grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+    }
     body.compact .drink-tile{ padding:8px; border-width:8px; }
     body.compact .tile-media{ height:64px; }
     body.compact .price{ font-size:.85em; }
     body.compact .quantity-display{ display:none; }
     body.compact .quantity-controls button{ min-width:40px; min-height:40px; padding:6px 8px; font-size:.95em; }
-    /* Mobile: Kategorienzeile immer einzeilig, horizontal scrollen statt Umbruch */
-    @media (max-width: 640px){
-      .category-bar{ flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; scrollbar-gutter: stable both-edges; }
-      .category-btn{ flex: 0 0 auto; }
-      .density-toggle{ margin-left: 8px; }
-      .category-bar{ overscroll-behavior-x: contain; }
-    }
-    /* Sicherstellen: Übersicht liegt über Kacheln/Badges */
-    .summary{ z-index: 1000; }
-    .quantity-badge{ z-index: 0; }
-    /* Compact: Übersicht & Buttons flacher */
-    body.compact .summary-header{ padding:4px 8px; }
-    body.compact .summary-toggle{ padding:2px 0; }
-    body.compact .summary-title{ font-size:.95em; }
-    body.compact .summary-hint{ font-size:.7em; }
-    body.compact .summary-content{ padding:4px 8px; max-height:52vh; }
-    body.compact .summary-items{ margin-bottom:6px; border-radius:8px; }
-    body.compact .summary-table th, body.compact .summary-table td{ padding:3px 5px; }
-    body.compact .change-container{ margin:4px 0; }
-    body.compact .change-display{ font-size: clamp(1rem, 3.5vw, 1.4rem); }
-    body.compact #grandTotal{ font-size: clamp(1.1rem, 3.5vw, 1.6rem); }
-    body.compact .cash-input{ gap:6px; margin:4px 0; }
-    body.compact .cash-input input{ padding:6px 8px; height:36px; font-size:1em; }
-    body.compact .reset-all-btn{ padding:6px 8px; border-radius:8px; font-size:.9em; min-height:36px; }
 
-    /* Dichte-Button: Icon + Text, auf Handy nur Icon */
-    .density-toggle .density-icon{ display:inline-block; font-size:1.1em; line-height:1; }
-    .density-toggle .density-text{ margin-left:6px; }
-    @media (max-width: 640px){
-      .density-toggle{ padding:0 !important; width:36px; height:36px; margin-left:0; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
-      .density-toggle .density-text{ display:none !important; }
+    .summary-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
+    .summary-bar .cash-input{ margin:0; }
+    .summary-bar .cash-input input{ width:140px; }
+    @media (max-width:480px){
+      .summary-bar .cash-input input{ width:110px; }
     }
-    /* Kompakt: Übersicht & Controls noch flacher */
+
     body.compact .summary-header{ padding:2px 6px; }
     body.compact .summary-content{ padding:4px 6px; max-height:50vh; }
     body.compact .summary-table th, body.compact .summary-table td{ padding:2px 4px; font-size:.9em; }
@@ -304,12 +289,6 @@
     body.compact #grandTotal{ font-size:1.2rem; }
     body.compact .change-display{ font-size:1rem; }
     body.compact .reset-all-btn{ padding:6px 8px; min-height:32px; border-radius:8px; font-size:.9em; }
-
-    /* Einzeilige Leiste: Betrag gegeben + ∑ Gesamtsumme */
-    .summary-bar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin:6px 0; }
-    .summary-bar .cash-input{ margin:0; }
-    .summary-bar .cash-input input{ width:140px; }
-    @media (max-width:480px){ .summary-bar .cash-input input{ width:110px; } }
   </style>
 </head>
 <body>
@@ -320,20 +299,16 @@
   </div>
 
   <div class="summary" id="summarySection" aria-live="polite">
-  <div class="summary" id="summarySection" aria-live="polite">
     <div class="summary-header">
       <button id="summaryToggle" class="summary-toggle" aria-expanded="true" aria-controls="summaryContent">
-        <div class="summary-title">Übersicht <span class="summary-hint">(Tippen zum Ein-/Ausklappen)</span></div>
-        <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
-      </button>
-      
-    </div>
-        <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
+        <div class="summary-title">
+          Übersicht <span class="summary-hint">(Tippen zum Ein-/Ausklappen)</span>
+        </div>
+        <div><span id="grandTotalMini">0,00 €</span> <span class="chevron">▾</span></div>
       </button>
     </div>
 
-    <div class="summary-content" id="summaryContent" style="display:block;">
-      <div class="summary-content" id="summaryContent">
+    <div class="summary-content" id="summaryContent">
       <div class="summary-items" id="summaryList"></div>
 
       <div class="change-container">
@@ -348,13 +323,12 @@
 
       <div class="change-container">
         <div class="change-display" id="changeDisplay"></div>
-      </div></div>
+      </div>
+    </div>
   </div>
 
-  <script>
-
-
-/* ---------- Weihnachtsmarkt-Artikel (aktualisiert) ---------- */
+<script>
+/* ---------- Artikel ---------- */
 let drinks = [
   { 
     name: "Glühwein Rot",
@@ -406,565 +380,493 @@ let drinks = [
     imgUrl: "https://fairu.news.at/9b27b5f3-eda5-4918-859d-ffc4e2138fdd/031458e7a2f5cb454d4ab7240e438d4568127d27.jpg?width=2560&focal=63-48-1&quality=90",
     addOns: []
   },
-
-  /* Bier & Softdrinks */
-  { 
-    name: "Pils",
-    price: 3.00,
-    quantity: 0,
-    color: "#FFC8E8",
-    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s",
-    addOns: []
-  },
-  { 
-    name: "Kölsch",
-    price: 3.00,
-    quantity: 0,
-    color: "#E8FFC8",
-    imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg",
-    addOns: []
-  },
-  { 
-    name: "Wasser",
-    price: 2.50,
-    quantity: 0,
-    color: "#C8E8FF",
-    imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg",
-    addOns: []
-  },
-  { 
-    name: "Cola",
-    price: 2.50,
-    quantity: 0,
-    color: "#FFD8C8",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png",
-    addOns: []
-  },
-  { 
-    name: "Limo",
-    price: 2.50,
-    quantity: 0,
-    color: "#F8C8FF",
-    imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg",
-    addOns: []
-  },
-  { 
-    name: "Sprite",
-    price: 2.50,
-    quantity: 0,
-    color: "#C8F8FF",
-    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg",
-    addOns: []
-  },
-  { 
-    name: "Apfelschorle",
-    price: 2.50,
-    quantity: 0,
-    color: "#FEE7C8",
-    imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg",
-    addOns: []
-  },
-
-  /* Kannen */
-  { 
-    name: "Glühwein Rot Kanne",
-    price: 25.00,
-    quantity: 0,
-    color: "#C8FFE8",
-    imgUrl: "https://www.testberichte.de/imgs/p_imgs_og/791447.jpg",
-    addOns: []
-  },
-  { 
-    name: "Glühwein Weiß Kanne",
-    price: 25.00,
-    quantity: 0,
-    color: "#FFE8C8",
-    imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg",
-    addOns: []
-  },
-  { 
-    name: "Chocomel Kanne",
-    price: 20.00,
-    quantity: 0,
-    color: "#E8C8FF",
-    imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg",
-    addOns: []
-  },
-  { 
-    name: "Rückgabe Kanne",
-    price: -10.00,
-    quantity: 0,
-    color: "#C8FEF0",
-    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg",
-    addOns: []
-  },
-
-    /* Pfand / Rückgabe Tassen & Kannen */
-  { 
-    name: "Ausgabe leerer Tasse",
-    price: 2.00,
-    quantity: 0,
-    color: "#FFF0C8",
-    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg",
-    addOns: []
-  },
-
-  /* Essen */
-  { 
-    name: "Krakauer im Brötchen",
-    price: 4.50,
-    quantity: 0,
-    color: "#FFD0B0",
-    imgUrl: "https://c8.alamy.com/compde/b3pp6a/ein-krakauer-wurst-in-ein-brot-brotchen-mit-senf-auf-einem-pappteller-b3pp6a.jpg",
-    addOns: []
-  },
-  { 
-    name: "Bratwurst im Brötchen",
-    price: 4.00,
-    quantity: 0,
-    color: "#FFC0A0",
-    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUuWMsEJS_1qFWruGcCrfbt6h6nT7awUdTvw&s",
-    addOns: []
-  }
+  { name: "Pils", price: 3.00, quantity: 0, color: "#FFC8E8",
+    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9JBs4nm5Z63O_KefzY-VdjKM7Eii-igv0FQ&s", addOns: [] },
+  { name: "Kölsch", price: 3.00, quantity: 0, color: "#E8FFC8",
+    imgUrl: "https://cdn02.plentymarkets.com/99cbvkn2wswt/item/images/580/full/Reissdorf-Koelsch-0-33-l-Bierflasche-kaufen.jpg", addOns: [] },
+  { name: "Wasser", price: 2.50, quantity: 0, color: "#C8E8FF",
+    imgUrl: "https://images.squarespace-cdn.com/content/v1/5ab436e5a2772c0f0060752c/1528838161840-HLGH0ZF38UGXY1NGU93D/Ein+Wasserglas+frischen+Mineralwassers+ist+die+beste+Sch%C3%B6nheitsquelle.jpg", addOns: [] },
+  { name: "Cola", price: 2.50, quantity: 0, color: "#FFD8C8",
+    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/2560px-Coca-Cola_logo.svg.png", addOns: [] },
+  { name: "Limo", price: 2.50, quantity: 0, color: "#F8C8FF",
+    imgUrl: "https://www.sucosorder.com/media/images/org/Fanta.jpg", addOns: [] },
+  { name: "Sprite", price: 2.50, quantity: 0, color: "#C8F8FF",
+    imgUrl: "https://upload.wikimedia.org/wikipedia/commons/a/ae/Sprite_2022.svg", addOns: [] },
+  { name: "Apfelschorle", price: 2.50, quantity: 0, color: "#FEE7C8",
+    imgUrl: "https://ebbingshop.de/64-large_default/lift-apfelschorle-05l.jpg", addOns: [] },
+  { name: "Glühwein Rot Kanne", price: 25.00, quantity: 0, color: "#C8FFE8",
+    imgUrl: "https://www.testberichte.de/imgs/p_imgs_og/791447.jpg", addOns: [] },
+  { name: "Glühwein Weiß Kanne", price: 25.00, quantity: 0, color: "#FFE8C8",
+    imgUrl: "https://www.galaxus.ch/im/productimages/3/9/3/6/0/1/7/7/3/4/4/7/7/8/3/1/9/3/0/e1ce1883-bb42-43f5-829f-931c1aff8a6a_cropped.jpg", addOns: [] },
+  { name: "Chocomel Kanne", price: 20.00, quantity: 0, color: "#E8C8FF",
+    imgUrl: "https://m.media-amazon.com/images/I/31MwO1TxJAS._AC_UF894,1000_QL80_.jpg", addOns: [] },
+  { name: "Rückgabe Kanne", price: -10.00, quantity: 0, color: "#C8FEF0",
+    imgUrl: "https://i.ebayimg.com/images/g/ZHgAAOSwzHZgkrPA/s-l400.jpg", addOns: [] },
+  { name: "Ausgabe leerer Tasse", price: 2.00, quantity: 0, color: "#FFF0C8",
+    imgUrl: "https://www.l-iz.de/wp-content/uploads/2016/11/tasse_wehnachtsmarkt.jpg", addOns: [] },
+  { name: "Krakauer im Brötchen", price: 4.50, quantity: 0, color: "#FFD0B0",
+    imgUrl: "https://c8.alamy.com/compde/b3pp6a/ein-krakauer-wurst-in-ein-brot-brotchen-mit-senf-auf-einem-pappteller-b3pp6a.jpg", addOns: [] },
+  { name: "Bratwurst im Brötchen", price: 4.00, quantity: 0, color: "#FFC0A0",
+    imgUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUuWMsEJS_1qFWruGcCrfbt6h6nT7awUdTvw&s", addOns: [] }
 ];
 
-/* Kategorien für deine Kategorienleiste */
+const essenNames = new Set(["Krakauer im Brötchen", "Bratwurst im Brötchen"]);
+drinks.forEach(d => d.category = essenNames.has(d.name) ? "Essen" : "Getränke");
 
-const essenNames     = new Set(["Krakauer im Brötchen", "Bratwurst im Brötchen"]);
+document.body.classList.add('compact');
 
-drinks.forEach(d => {
-  if (essenNames.has(d.name))     d.category = 'Essen';
-  else                                 d.category = 'Getränke';
-});
+/* ------- DOM-Refs ------- */
+let preparedStates = {};
+const mainContent     = document.getElementById('mainContent');
+const drinkContainer  = document.getElementById('drinkContainer');
+const summarySection  = document.getElementById('summarySection');
+const summaryListEl   = document.getElementById('summaryList');
+const grandTotalEl    = document.getElementById('grandTotal');
+const grandTotalMini  = document.getElementById('grandTotalMini');
+const cashGivenInput  = document.getElementById('cashGiven');
+const changeDisplayEl = document.getElementById('changeDisplay');
+const summaryToggle   = document.getElementById('summaryToggle');
+const categoryBar     = document.getElementById('categoryBar');
 
+let tileElements = [];
 
-
-  let preparedStates = {};
-
-  const mainContent     = document.getElementById('mainContent');
-  const drinkContainer  = document.getElementById('drinkContainer');
-  const summarySection  = document.getElementById('summarySection');
-  const summaryListEl   = document.getElementById('summaryList');
-  const summaryContent  = document.getElementById('summaryContent');
-  const grandTotalEl    = document.getElementById('grandTotal');
-  const grandTotalMini  = document.getElementById('grandTotalMini');
-  const resetAllBtn     = document.getElementById('resetAllButton');
-  const cashGivenInput  = document.getElementById('cashGiven');
-  const changeDisplayEl = document.getElementById('changeDisplay');
-  const summaryToggle   = document.getElementById('summaryToggle');
-  const categoryBar    = document.getElementById('categoryBar');
-  const resetAllBtnHeader = document.getElementById('resetAllButtonHeader');
-  const COMPACT_KEY = 'compactMode';
-
-  document.body.classList.add('compact');
-
-
-// Layout an die gewählte Dichte anpassen
-adjustLayout();
-
-function setCompact(on){
-  // dauerhaft kompakt – keine Funktion mehr
+/* ------- Hilfsfunktionen Farben ------- */
+function hexToRgb(hex){
+  if(!hex) return {r:255,g:255,b:255};
+  let c = hex.replace('#','');
+  if(c.length===3){ c = c.split('').map(x=>x+x).join(''); }
+  const num = parseInt(c,16);
+  return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+}
+function relativeLuminance(r,g,b){
+  const srgb = [r,g,b].map(v=>{ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+  return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
+}
+function getTextColor(hex){
+  const {r,g,b} = hexToRgb(hex||'#ffffff');
+  const L = relativeLuminance(r,g,b);
+  const contrastBlack = (L + 0.05) / 0.05;
+  const contrastWhite = 1.05 / (L + 0.05);
+  return (contrastWhite > contrastBlack) ? '#fff' : '#111';
 }
 
-  let tileElements = [];
+/* ------- Kategorien ------- */
+let selectedCategory = 'Alle';
 
-  // Hilfsfunktionen: Kontrastfarbe basierend auf Hintergrund
-  function hexToRgb(hex){
-    if(!hex) return {r:255,g:255,b:255};
-    let c = hex.replace('#','');
-    if(c.length===3){ c = c.split('').map(x=>x+x).join(''); }
-    const num = parseInt(c,16);
-    return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
-  }
-  function relativeLuminance(r,g,b){
-    const srgb = [r,g,b].map(v=>{ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
-    return 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-  }
-  function getTextColor(hex){
-    const {r,g,b} = hexToRgb(hex||'#ffffff');
-    const L = relativeLuminance(r,g,b);
-    const contrastBlack = (L + 0.05) / 0.05; // schwarz L=0
-    const contrastWhite = 1.05 / (L + 0.05); // weiß L=1
-    return (contrastWhite > contrastBlack) ? '#fff' : '#111';
-  }
-
-  let selectedCategory = 'Alle';
-  function buildCategoryBar(){
-    const categories = ['Alle', ...Array.from(new Set(drinks.map(d=>d.category)))];
-    categoryBar.innerHTML = '';
-    categories.forEach(cat=>{
-      const btn = document.createElement('button');
-      btn.type='button'; btn.className='category-btn'; btn.textContent=cat;
-      btn.setAttribute('aria-pressed', cat===selectedCategory ? 'true' : 'false');
-      btn.addEventListener('click', ()=>{
-        selectedCategory = cat;
-        categoryBar.querySelectorAll('.category-btn').forEach(b=> b.setAttribute('aria-pressed', b.textContent===selectedCategory ? 'true' : 'false'));
-        applyCategoryFilter();
-    buildSummaryBar();
+function buildCategoryBar(){
+  const categories = ['Alle', ...Array.from(new Set(drinks.map(d=>d.category)))];
+  categoryBar.innerHTML = '';
+  categories.forEach(cat=>{
+    const btn = document.createElement('button');
+    btn.type='button'; btn.className='category-btn'; btn.textContent=cat;
+    btn.setAttribute('aria-pressed', cat===selectedCategory ? 'true' : 'false');
+    btn.addEventListener('click', ()=>{
+      selectedCategory = cat;
+      categoryBar.querySelectorAll('.category-btn').forEach(b=>{
+        b.setAttribute('aria-pressed', b.textContent===selectedCategory ? 'true':'false');
       });
-      categoryBar.appendChild(btn);
+      applyCategoryFilter();
+      buildSummaryBar();
     });
-  }
-  function applyCategoryFilter(){
-    tileElements.forEach(({drink, tile})=>{
-      const show = (selectedCategory==='Alle') || (drink.category===selectedCategory);
-      tile.style.display = show ? '' : 'none';
-    });
-    adjustLayout();
-  }
+    categoryBar.appendChild(btn);
+  });
+}
 
-  function initializeTiles(){
-    drinks.forEach((drink) => {
-      const tile = document.createElement('div');
-      tile.classList.add('drink-tile');
-      tile.style.borderColor = drink.color;
-      tile.setAttribute('role','button');
-      tile.setAttribute('aria-label', `${drink.name} hinzufügen`);
-      tile.tabIndex = 0;
+function applyCategoryFilter(){
+  tileElements.forEach(({drink, tile})=>{
+    const show = (selectedCategory==='Alle') || (drink.category===selectedCategory);
+    tile.style.display = show ? '' : 'none';
+  });
+  adjustLayout();
+}
 
-      const media = document.createElement('div'); media.classList.add('tile-media');
-      const img = document.createElement('img');
-      img.src = drink.imgUrl; img.alt = drink.name; img.loading = 'lazy'; img.decoding = 'async';
-      img.onerror = () => { img.style.display = 'none'; };
-      media.appendChild(img);
-      tile.appendChild(media);
+/* ------- Tiles ------- */
+function initializeTiles(){
+  drinks.forEach((drink) => {
+    const tile = document.createElement('div');
+    tile.classList.add('drink-tile');
+    tile.style.borderColor = drink.color;
+    tile.setAttribute('role','button');
+    tile.setAttribute('aria-label', `${drink.name} hinzufügen`);
+    tile.tabIndex = 0;
 
-      const title = document.createElement('h2');
-      title.textContent = drink.name; tile.appendChild(title);
+    const media = document.createElement('div'); media.classList.add('tile-media');
+    const img = document.createElement('img');
+    img.src = drink.imgUrl; img.alt = drink.name; img.loading = 'lazy'; img.decoding = 'async';
+    img.onerror = () => { img.style.display = 'none'; };
+    media.appendChild(img);
+    tile.appendChild(media);
 
-      const priceInfo = document.createElement('p'); priceInfo.classList.add('price'); tile.appendChild(priceInfo);
-      const quantityInfo = document.createElement('p'); quantityInfo.classList.add('quantity-display'); tile.appendChild(quantityInfo);
-      const quantityBadge = document.createElement('span'); quantityBadge.classList.add('quantity-badge'); tile.appendChild(quantityBadge);
+    const title = document.createElement('h2');
+    title.textContent = drink.name; tile.appendChild(title);
 
-      const controls = document.createElement('div'); controls.classList.add('quantity-controls'); tile.appendChild(controls);
+    const priceInfo = document.createElement('p'); priceInfo.classList.add('price'); tile.appendChild(priceInfo);
+    const quantityInfo = document.createElement('p'); quantityInfo.classList.add('quantity-display'); tile.appendChild(quantityInfo);
+    const quantityBadge = document.createElement('span'); quantityBadge.classList.add('quantity-badge'); tile.appendChild(quantityBadge);
 
-      const zeroBtn = document.createElement('button'); zeroBtn.textContent = '0';
-      zeroBtn.addEventListener('click', (e)=>{ e.stopPropagation(); drink.quantity = 0; if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0);} updateView(); });
-      controls.appendChild(zeroBtn);
+    const controls = document.createElement('div'); controls.classList.add('quantity-controls'); tile.appendChild(controls);
 
-      const minusBtn = document.createElement('button'); minusBtn.textContent='-1';
-      minusBtn.addEventListener('click', (e)=>{ e.stopPropagation(); if(drink.quantity>0){ drink.quantity--; updateView(); }});
-      controls.appendChild(minusBtn);
+    let addonsContainer = null;
+    let addonToggle = null;
 
-      const plus5Btn = document.createElement('button'); plus5Btn.textContent = '+5';
-      plus5Btn.addEventListener('click', (e)=>{ e.stopPropagation(); drink.quantity+=5; updateView(); });
-      controls.appendChild(plus5Btn);
-
-      // Tap/Klick auf die Kachel => +1
-      const inc = ()=>{ drink.quantity++; updateView(); if (navigator.vibrate) navigator.vibrate(10); };
-      tile.addEventListener('click', inc);
-      tile.addEventListener('keydown', (ev)=>{ if(ev.key==='Enter' || ev.key===' '){ ev.preventDefault(); inc(); }});
-
-      // Add-ons
-      const addonElements = [];
-      if (drink.addOns && drink.addOns.length){
-        const addonsContainer = document.createElement('div');
-        addonsContainer.classList.add('addons-container');
-        tile.appendChild(addonsContainer);
-
-        drink.addOns.forEach((addon)=>{
-          const addonTile = document.createElement('div');
-          addonTile.classList.add('addon-tile');
-          addonTile.style.borderColor = addon.color || '#999';
-
-          // Klick auf die Kachel: +1 Add-on
-          addonTile.addEventListener('click', (e)=>{
-            e.stopPropagation();
-            addon.quantity++;
-            updateView();
-            if (navigator.vibrate) navigator.vibrate(8);
-          });
-
-          const addonTitle = document.createElement('h3');
-          addonTile.appendChild(addonTitle);
-
-          // Untere Zeile: Menge – Preis – Button
-          const addonRow = document.createElement('div');
-          addonRow.classList.add('addon-row');
-          addonTile.appendChild(addonRow);
-
-                    // Controls: nur noch "0"-Button zum Zurücksetzen
-          const addonControls = document.createElement('div');
-          addonControls.classList.add('addon-controls');
-          addonRow.appendChild(addonControls);
-
-          const addonZeroBtn = document.createElement('button');
-          addonZeroBtn.textContent = '0';
-          addonZeroBtn.addEventListener('click', (ev)=>{
-            ev.stopPropagation();
-            addon.quantity = 0;
-            updateView();
-          });
-          addonControls.appendChild(addonZeroBtn);
-
-          const addonPrice = document.createElement('p');
-          addonPrice.classList.add('addon-price');
-          addonRow.appendChild(addonPrice);
-
-          const addonQuantity = document.createElement('p');
-          addonQuantity.classList.add('addon-quantity-big');
-          addonRow.appendChild(addonQuantity);
-
-          addonElements.push({ addon, addonTile, addonTitle, addonPrice, addonQuantity });
-          addonsContainer.appendChild(addonTile);
-        });
-      }
-
-
-      drinkContainer.appendChild(tile);
-      tileElements.push({ drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements });
-    });
-  }
-
-  function updateView(){
-    tileElements.forEach(el=>{
-      const { drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements } = el;
-      priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Rückgabe)" : drink.price.toFixed(2)+" €").replace('.', ',');
-      quantityInfo.textContent = "Menge: " + drink.quantity;
-
-      // Badge im Kompaktmodus
-      if (quantityBadge){
-        if (drink.quantity > 0){
-          quantityBadge.textContent = String(drink.quantity);
-          quantityBadge.style.display = 'inline-flex';
-          const tc = getTextColor(drink.color);
-          quantityBadge.style.color = (tc === '#fff') ? '#fff' : '#111';
-          quantityBadge.style.background = (tc === '#fff') ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.65)';
-          quantityBadge.style.border = '1px solid rgba(0,0,0,.15)';
-        } else {
-          quantityBadge.style.display = 'none';
+    const zeroBtn = document.createElement('button'); zeroBtn.textContent = '0';
+    zeroBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      drink.quantity = 0;
+      if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0); }
+      // Add-ons einklappen
+      if(addonsContainer){
+        addonsContainer.classList.remove('open');
+        if(addonToggle){
+          addonToggle.setAttribute('aria-expanded','false');
+          addonToggle.textContent = 'Extras ▾';
         }
       }
+      updateView();
+    });
+    controls.appendChild(zeroBtn);
 
-      tile.style.borderColor = drink.color;
-      if(drink.quantity>0){ tile.classList.add('active'); tile.style.backgroundColor = drink.color;
-        tile.style.color = getTextColor(drink.color); }
-      else{ tile.classList.remove('active'); tile.style.backgroundColor = '#fff';
-        tile.style.color = '#111'; }
+    const minusBtn = document.createElement('button'); minusBtn.textContent='-1';
+    minusBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(drink.quantity>0){ drink.quantity--; updateView(); }
+    });
+    controls.appendChild(minusBtn);
 
-      addonElements.forEach(ae=>{
-        const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
-        addonTitle.textContent = addon.name;
-        addonPrice.textContent = (addon.price !== 0 ? addon.price.toFixed(2)+" €" : "–").replace('.', ',');
-        addonQuantity.textContent = addon.quantity;
-        addonTile.style.borderColor = addon.color || '#999';
-        addonTile.style.backgroundColor = addon.quantity>0 ? (addon.color || '#eee') : '#fff';
-        addonTile.style.color = addon.quantity>0 ? getTextColor(addon.color || '#eee') : '#111';
+    const plus5Btn = document.createElement('button'); plus5Btn.textContent = '+5';
+    plus5Btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      drink.quantity+=5; updateView();
+    });
+    controls.appendChild(plus5Btn);
+
+    const inc = ()=>{
+      drink.quantity++;
+      updateView();
+      if (navigator.vibrate) navigator.vibrate(10);
+    };
+    tile.addEventListener('click', inc);
+    tile.addEventListener('keydown', (ev)=>{
+      if(ev.key==='Enter' || ev.key===' '){
+        ev.preventDefault(); inc();
+      }
+    });
+
+    const addonElements = [];
+    if (drink.addOns && drink.addOns.length){
+      // Toggle-Button
+      addonToggle = document.createElement('button');
+      addonToggle.type = 'button';
+      addonToggle.className = 'addon-toggle';
+      addonToggle.textContent = 'Extras ▾';
+      addonToggle.setAttribute('aria-expanded','false');
+      addonToggle.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(!addonsContainer) return;
+        const isOpen = !addonsContainer.classList.contains('open');
+        addonsContainer.classList.toggle('open', isOpen);
+        addonToggle.setAttribute('aria-expanded', String(isOpen));
+        addonToggle.textContent = isOpen ? 'Extras ▲' : 'Extras ▾';
+        adjustLayout();
       });
-    });
-    updateSummary();
-  }
+      tile.appendChild(addonToggle);
 
-  function updateSummary(){
-    let rows = []; let total = 0;
-    drinks.forEach(drink=>{
-      let lineTotal = drink.quantity * drink.price; let addOnSum = 0; let addOnRows=[];
-      if(drink.addOns){
-        drink.addOns.forEach(addon=>{
-          if(addon.quantity!==0){
-            let addonLineTotal = addon.quantity * addon.price; addOnSum += addonLineTotal;
-            addOnRows.push({ name: '→ ' + addon.name, quantity: addon.quantity, price: addon.price, total: addonLineTotal, color: drink.color, rowID: 'addon-'+drink.name+'::'+addon.name });
-          }
+      // Container
+      addonsContainer = document.createElement('div');
+      addonsContainer.classList.add('addons-container');
+      tile.appendChild(addonsContainer);
+
+      drink.addOns.forEach((addon)=>{
+        const addonTile = document.createElement('div');
+        addonTile.classList.add('addon-tile');
+        addonTile.style.borderColor = addon.color || '#999';
+
+        addonTile.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          addon.quantity++;
+          updateView();
+          if (navigator.vibrate) navigator.vibrate(8);
         });
-      }
-      if(drink.quantity!==0 || addOnSum!==0){
-        rows.push({ name: drink.name, quantity: drink.quantity, price: drink.price, total: lineTotal, color: drink.color, rowID: 'main-'+drink.name });
-        rows.push(...addOnRows);
-      }
-      total += lineTotal + addOnSum;
-    });
-    buildSummaryList(rows);
-    const totalText = ("∑ " + total.toFixed(2).replace('.', ',') + " €");
-    grandTotalEl.textContent = totalText;
-    grandTotalMini.textContent = '∑ ' + total.toFixed(2).replace('.', ',') + ' €';
-    calculateChange(total);
-    adjustLayout();
-  }
 
-  function buildSummaryList(rows){
-    if(rows.length===0){ summaryListEl.classList.add('is-empty');
-    summaryListEl.innerHTML = '<p>Keine Artikel ausgewählt.</p>'; return; }
-    let html = `
-      <table class="summary-table" aria-label="Bestellübersicht">
-        <thead>
-          <tr>
-            <th>Fertig?</th>
-            <th>Artikel</th>
-            <th>Menge</th>
-            <th>Einzelpreis</th>
-            <th>Gesamt</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    rows.forEach(r=>{
-      let singlePrice = (r.price!==0) ? r.price.toFixed(2).replace('.', ',') + ' €' : '–';
-      let totalPrice  = r.total.toFixed(2).replace('.', ',') + ' €';
-      let isChecked   = preparedStates[r.rowID] === true ? 'checked' : '';
-      html += `
-        <tr data-rowid="${r.rowID}" style="background-color:${r.color}; color:${r.textColor || getTextColor(r.color)};">
-          <td><input type="checkbox" data-rowid="${r.rowID}" ${isChecked} /></td>
-          <td>${r.name}</td>
-          <td>${r.quantity}</td>
-          <td>${singlePrice}</td>
-          <td>${totalPrice}</td>
+        const addonTitle = document.createElement('h3');
+        addonTile.appendChild(addonTitle);
+
+        const addonRow = document.createElement('div');
+        addonRow.classList.add('addon-row');
+        addonTile.appendChild(addonRow);
+
+        const addonControls = document.createElement('div');
+        addonControls.classList.add('addon-controls');
+        addonRow.appendChild(addonControls);
+
+        const addonZeroBtn = document.createElement('button');
+        addonZeroBtn.textContent = '0';
+        addonZeroBtn.addEventListener('click', (ev)=>{
+          ev.stopPropagation();
+          addon.quantity = 0;
+          updateView();
+        });
+        addonControls.appendChild(addonZeroBtn);
+
+        const addonPrice = document.createElement('p');
+        addonPrice.classList.add('addon-price');
+        addonRow.appendChild(addonPrice);
+
+        const addonQuantity = document.createElement('p');
+        addonQuantity.classList.add('addon-quantity-big');
+        addonRow.appendChild(addonQuantity);
+
+        addonElements.push({ addon, addonTile, addonTitle, addonPrice, addonQuantity });
+        addonsContainer.appendChild(addonTile);
+      });
+    }
+
+    drinkContainer.appendChild(tile);
+    tileElements.push({ drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements, addonsContainer, addonToggle });
+  });
+}
+
+/* ------- View-Updates ------- */
+function updateView(){
+  tileElements.forEach(el=>{
+    const { drink, tile, priceInfo, quantityInfo, quantityBadge, addonElements } = el;
+    priceInfo.textContent = (drink.price < 0 ? drink.price.toFixed(2)+" € (Rückgabe)" : drink.price.toFixed(2)+" €").replace('.', ',');
+    quantityInfo.textContent = "Menge: " + drink.quantity;
+
+    if (quantityBadge){
+      if (drink.quantity > 0){
+        quantityBadge.textContent = String(drink.quantity);
+        quantityBadge.style.display = 'inline-flex';
+        const tc = getTextColor(drink.color);
+        quantityBadge.style.color = (tc === '#fff') ? '#fff' : '#111';
+        quantityBadge.style.background = (tc === '#fff') ? 'rgba(0,0,0,.35)' : 'rgba(255,255,255,.65)';
+        quantityBadge.style.border = '1px solid rgba(0,0,0,.15)';
+      } else {
+        quantityBadge.style.display = 'none';
+      }
+    }
+
+    tile.style.borderColor = drink.color;
+    if(drink.quantity>0){
+      tile.classList.add('active');
+      tile.style.backgroundColor = drink.color;
+      tile.style.color = getTextColor(drink.color);
+    }else{
+      tile.classList.remove('active');
+      tile.style.backgroundColor = '#fff';
+      tile.style.color = '#111';
+    }
+
+    addonElements.forEach(ae=>{
+      const { addon, addonTile, addonTitle, addonPrice, addonQuantity } = ae;
+      addonTitle.textContent = addon.name;
+      addonPrice.textContent = (addon.price !== 0 ? addon.price.toFixed(2)+" €" : "–").replace('.', ',');
+      addonQuantity.textContent = addon.quantity;
+      addonTile.style.borderColor = addon.color || '#999';
+      addonTile.style.backgroundColor = addon.quantity>0 ? (addon.color || '#eee') : '#fff';
+      addonTile.style.color = addon.quantity>0 ? getTextColor(addon.color || '#eee') : '#111';
+    });
+  });
+  updateSummary();
+}
+
+/* ------- Summary ------- */
+function updateSummary(){
+  let rows = []; let total = 0;
+  drinks.forEach(drink=>{
+    let lineTotal = drink.quantity * drink.price;
+    let addOnSum = 0; let addOnRows=[];
+    if(drink.addOns){
+      drink.addOns.forEach(addon=>{
+        if(addon.quantity!==0){
+          let addonLineTotal = addon.quantity * addon.price; addOnSum += addonLineTotal;
+          addOnRows.push({ name: '→ ' + addon.name, quantity: addon.quantity, price: addon.price, total: addonLineTotal, color: drink.color, rowID: 'addon-'+drink.name+'::'+addon.name });
+        }
+      });
+    }
+    if(drink.quantity!==0 || addOnSum!==0){
+      rows.push({ name: drink.name, quantity: drink.quantity, price: drink.price, total: lineTotal, color: drink.color, rowID: 'main-'+drink.name });
+      rows.push(...addOnRows);
+    }
+    total += lineTotal + addOnSum;
+  });
+  buildSummaryList(rows);
+  const totalText = ("∑ " + total.toFixed(2).replace('.', ',') + " €");
+  grandTotalEl.textContent = totalText;
+  grandTotalMini.textContent = '∑ ' + total.toFixed(2).replace('.', ',') + ' €';
+  calculateChange(total);
+  adjustLayout();
+}
+
+function buildSummaryList(rows){
+  if(rows.length===0){
+    summaryListEl.classList.add('is-empty');
+    summaryListEl.innerHTML = '<p>Keine Artikel ausgewählt.</p>';
+    return;
+  }
+  let html = `
+    <table class="summary-table" aria-label="Bestellübersicht">
+      <thead>
+        <tr>
+          <th>Fertig?</th>
+          <th>Artikel</th>
+          <th>Menge</th>
+          <th>Einzelpreis</th>
+          <th>Gesamt</th>
         </tr>
-      `;
+      </thead>
+      <tbody>
+  `;
+  rows.forEach(r=>{
+    let singlePrice = (r.price!==0) ? r.price.toFixed(2).replace('.', ',') + ' €' : '–';
+    let totalPrice  = r.total.toFixed(2).replace('.', ',') + ' €';
+    let isChecked   = preparedStates[r.rowID] === true ? 'checked' : '';
+    html += `
+      <tr data-rowid="${r.rowID}" style="background-color:${r.color}; color:${r.textColor || getTextColor(r.color)};">
+        <td><input type="checkbox" data-rowid="${r.rowID}" ${isChecked} /></td>
+        <td>${r.name}</td>
+        <td>${r.quantity}</td>
+        <td>${singlePrice}</td>
+        <td>${totalPrice}</td>
+      </tr>
+    `;
+  });
+  html += '</tbody></table>';
+  summaryListEl.classList.remove('is-empty');
+  summaryListEl.innerHTML = html;
+
+  summaryListEl.querySelectorAll('input[type="checkbox"]').forEach(chk=>{
+    chk.addEventListener('change', (e)=>{
+      let rowID = e.target.dataset.rowid;
+      preparedStates[rowID] = e.target.checked;
     });
-    html += '</tbody></table>';
-    summaryListEl.classList.remove('is-empty');
-    summaryListEl.innerHTML = html;
+  });
+}
 
-    summaryListEl.querySelectorAll('input[type="checkbox"]').forEach(chk=>{
-      chk.addEventListener('change', (e)=>{ let rowID = e.target.dataset.rowid; preparedStates[rowID] = e.target.checked; });
-    });
-  }
+/* ------- Geld / Layout / Reset ------- */
+function calculateChange(total){
+  let cash = parseFloat((cashGivenInput.value||'').replace(',', '.'));
+  if(isNaN(cash)){ changeDisplayEl.textContent = ''; return; }
+  let diff = cash - total;
+  if(diff>=0){ changeDisplayEl.textContent = 'Rückgeld: ' + diff.toFixed(2).replace('.', ',') + ' €'; }
+  else{ changeDisplayEl.textContent = 'Fehlbetrag: ' + Math.abs(diff).toFixed(2).replace('.', ',') + ' €'; }
+}
 
-  function calculateChange(total){
-    let cash = parseFloat((cashGivenInput.value||'').replace(',', '.'));
-    if(isNaN(cash)){ changeDisplayEl.textContent = ''; return; }
-    let diff = cash - total;
-    if(diff>=0){ changeDisplayEl.textContent = 'Rückgeld: ' + diff.toFixed(2).replace('.', ',') + ' €'; }
-    else{ changeDisplayEl.textContent = 'Fehlbetrag: ' + Math.abs(diff).toFixed(2).replace('.', ',') + ' €'; }
-  }
+function adjustLayout(){
+  const height = summarySection.classList.contains('collapsed')
+    ? summarySection.querySelector('.summary-header').offsetHeight
+    : summarySection.offsetHeight;
+  mainContent.style.paddingBottom = (height + 16) + 'px';
+}
 
-  function adjustLayout(){
-    // Abstand unten, damit die Kacheln nicht unter das Bottom‑Sheet laufen
-    const height = summarySection.classList.contains('collapsed') ? summarySection.querySelector('.summary-header').offsetHeight : summarySection.offsetHeight;
-    mainContent.style.paddingBottom = (height + 16) + 'px';
-  }
+function resetAll(){
+  drinks.forEach(drink=>{
+    drink.quantity=0;
+    if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0); }
+  });
+  cashGivenInput.value = '';
+  preparedStates = {};
 
-  function resetAll(){
-    drinks.forEach(drink=>{ drink.quantity=0; if(drink.addOns){ drink.addOns.forEach(a=>a.quantity=0);} });
-    cashGivenInput.value = ''; preparedStates = {}; updateView();
-  }
-
-  function ensureResetButtonInContent(){
-    const sc = document.getElementById('summaryContent');
-    if (sc && !document.getElementById('resetAllButton')){
-      const btn = document.createElement('button');
-      btn.className = 'reset-all-btn';
-      btn.id = 'resetAllButton';
-      btn.textContent = 'Gesamte Bestellung auf 0';
-      sc.appendChild(btn);
-      btn.addEventListener('click', resetAll);
+  // Alle Add-on-Container einklappen
+  tileElements.forEach(el=>{
+    if(el.addonsContainer){
+      el.addonsContainer.classList.remove('open');
     }
-  }
-
-  function sanitizeSummary(){
-    const summaries = document.querySelectorAll('.summary');
-    summaries.forEach((el, idx)=>{ if(idx>0) el.remove(); });
-    document.querySelectorAll('.summary-toggle').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
-    document.querySelectorAll('#grandTotalMini').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
-  }
-
-  // Erzeuge/ordne die einzeilige Leiste: Betrag gegeben + ∑ Gesamtsumme
-  function buildSummaryBar(){
-    const sc = document.getElementById('summaryContent');
-    if(!sc) return;
-    let bar = document.getElementById('summaryBar');
-    const itemsWrap = document.getElementById('summaryList')?.parentElement;
-    const totalWrap = grandTotalEl ? grandTotalEl.parentElement : null; // .change-container
-    const cash = document.querySelector('.cash-input');
-    if(!bar){
-      bar = document.createElement('div');
-      bar.className = 'summary-bar';
-      bar.id = 'summaryBar';
-      if(itemsWrap && itemsWrap.nextSibling){ sc.insertBefore(bar, itemsWrap.nextSibling); }
-      else{ sc.insertBefore(bar, sc.firstChild); }
+    if(el.addonToggle){
+      el.addonToggle.setAttribute('aria-expanded','false');
+      el.addonToggle.textContent = 'Extras ▾';
     }
-    if(totalWrap && totalWrap.parentElement !== bar){ bar.appendChild(totalWrap); }
-    if(cash && cash.parentElement !== bar){ bar.appendChild(cash); }
-  
-    // Nur Toggle im Header erlauben
-    document.querySelectorAll('.summary-toggle').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
-    // Nur Mini-Summe im Header erlauben
-    document.querySelectorAll('#grandTotalMini').forEach(el=>{ if(!el.closest('.summary-header')) el.remove(); });
-  }
-
-  function setCollapsed(collapsed){
-    summarySection.classList.toggle('collapsed', !!collapsed);
-    summaryToggle.setAttribute('aria-expanded', (!collapsed).toString());
-    adjustLayout();
-  }
-
-  // Init
-  window.addEventListener('load', ()=>{
-    // Grundinitialisierung
-    initializeTiles();
-    updateView();
-
-    // Filter-/UI-Bars
-    buildCategoryBar();
-    applyCategoryFilter();
-
-    // Header sicher über den Inhalt setzen
-    const headerEl = document.querySelector('.summary-header');
-    const contentEl = document.getElementById('summaryContent');
-    const sectionEl = document.getElementById('summarySection');
-    if (sectionEl && headerEl && contentEl && headerEl.nextElementSibling !== contentEl) {
-      sectionEl.insertBefore(headerEl, contentEl);
-    }
-
-    // Zusätzliche Sicherungen/Buttons
-    if (typeof ensureResetButtonInContent === 'function') ensureResetButtonInContent();
-    if (typeof sanitizeSummary === 'function') sanitizeSummary();
-
-    // Startzustand
-    setCollapsed(false);
   });
 
-  if (resetAllBtnHeader) resetAllBtnHeader.addEventListener('click', resetAll);
-  if (resetAllBtn)       resetAllBtn.addEventListener('click', resetAll);
+  updateView();
+}
 
-  if (cashGivenInput) cashGivenInput.addEventListener('input', ()=>{
-    let total = 0; drinks.forEach(d=>{ total += d.quantity * d.price; if(d.addOns){ d.addOns.forEach(a=> total += a.quantity * a.price ); } });
-    calculateChange(total);
-  });
-
-  if (summaryToggle) summaryToggle.addEventListener('click', ()=>{
-    setCollapsed(!summarySection.classList.contains('collapsed'));
-  });
-
-  window.addEventListener('resize', adjustLayout);
-    // Zeilenklick in der Übersicht: toggelt das Häkchen
-  if (summaryListEl) {
-    summaryListEl.addEventListener('click', function(e){
-      const tr = e.target.closest('tbody tr');
-      if (!tr) return;
-      if (e.target.closest('input, button, a, label')) return; // Interaktives nicht doppelt toggeln
-      const chk = tr.querySelector('input[type="checkbox"]');
-      if (!chk) return;
-      chk.checked = !chk.checked;
-      const rowID = chk.dataset.rowid || tr.dataset.rowid;
-      preparedStates[rowID] = chk.checked;
-      // Sofort Styles aktualisieren & Change-Event auslösen
-      tr.classList.toggle('row-checked', chk.checked);
-      chk.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+function ensureResetButtonInContent(){
+  const sc = document.getElementById('summaryContent');
+  if (sc && !document.getElementById('resetAllButton')){
+    const btn = document.createElement('button');
+    btn.className = 'reset-all-btn';
+    btn.id = 'resetAllButton';
+    btn.textContent = 'Gesamte Bestellung auf 0';
+    sc.appendChild(btn);
+    btn.addEventListener('click', resetAll);
   }
-  // --- Größeres Häkchen + Zeilen-Rahmen (blau) ---
-  function syncRowCheckedStyles(){
-    if(!summaryListEl) return;
+}
+
+function buildSummaryBar(){
+  const sc = document.getElementById('summaryContent');
+  if(!sc) return;
+  let bar = document.getElementById('summaryBar');
+  const itemsWrap = document.getElementById('summaryList')?.parentElement;
+  const totalWrap = grandTotalEl ? grandTotalEl.parentElement : null;
+  const cash = document.querySelector('.cash-input');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.className = 'summary-bar';
+    bar.id = 'summaryBar';
+    if(itemsWrap && itemsWrap.nextSibling){ sc.insertBefore(bar, itemsWrap.nextSibling); }
+    else{ sc.insertBefore(bar, sc.firstChild); }
+  }
+  if(totalWrap && totalWrap.parentElement !== bar){ bar.appendChild(totalWrap); }
+  if(cash && cash.parentElement !== bar){ bar.appendChild(cash); }
+}
+
+function setCollapsed(collapsed){
+  summarySection.classList.toggle('collapsed', !!collapsed);
+  summaryToggle.setAttribute('aria-expanded', (!collapsed).toString());
+  adjustLayout();
+}
+
+/* ------- Init ------- */
+window.addEventListener('load', ()=>{
+  initializeTiles();
+  updateView();
+
+  buildCategoryBar();
+  applyCategoryFilter();
+
+  ensureResetButtonInContent();
+  setCollapsed(false);
+});
+
+if (cashGivenInput) cashGivenInput.addEventListener('input', ()=>{
+  let total = 0;
+  drinks.forEach(d=>{
+    total += d.quantity * d.price;
+    if(d.addOns){ d.addOns.forEach(a=> total += a.quantity * a.price ); }
+  });
+  calculateChange(total);
+});
+
+if (summaryToggle) summaryToggle.addEventListener('click', ()=>{
+  setCollapsed(!summarySection.classList.contains('collapsed'));
+});
+
+window.addEventListener('resize', adjustLayout);
+
+/* Zeilenklick in der Übersicht: toggelt das Häkchen */
+if (summaryListEl) {
+  summaryListEl.addEventListener('click', function(e){
+    const tr = e.target.closest('tbody tr');
+    if (!tr) return;
+    if (e.target.closest('input, button, a, label')) return;
+    const chk = tr.querySelector('input[type="checkbox"]');
+    if (!chk) return;
+    chk.checked = !chk.checked;
+    const rowID = chk.dataset.rowid || tr.dataset.rowid;
+    preparedStates[rowID] = chk.checked;
+    tr.classList.toggle('row-checked', chk.checked);
+    chk.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  const obs = new MutationObserver(()=>{
     summaryListEl.querySelectorAll('tbody tr').forEach(tr=>{
       const chk = tr.querySelector('input[type="checkbox"]');
       if(chk){ tr.classList.toggle('row-checked', chk.checked); }
     });
-  }
-  // Delegierter Listener: reagiert auf Änderungen an Checkboxen
-  if (summaryListEl){
-    summaryListEl.addEventListener('change', function(e){
-      if(e.target && e.target.matches('input[type="checkbox"]')){
-        const tr = e.target.closest('tr');
-        if(tr){ tr.classList.toggle('row-checked', e.target.checked); }
-      }
-    });
-    // Beobachte DOM-Änderungen (nach rebuild der Tabelle)
-    const obs = new MutationObserver(()=>{ syncRowCheckedStyles(); });
-    obs.observe(summaryListEl, { childList: true });
-  }
-  // Erste Synchronisierung
-  syncRowCheckedStyles();
+  });
+  obs.observe(summaryListEl, { childList: true });
+}
 </script>
 </body>
 </html>
