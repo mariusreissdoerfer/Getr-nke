@@ -410,7 +410,11 @@ let drinks = [
     quantity: 0,
     color: "#C8C8FF",
     imgUrl: "https://www.gutekueche.at/storage/media/recipe/149998/conv/kinderpunsch-default.jpg",
-    addOns: []
+    addOns: [
+      { name: "Amaretto", price: 1.00, quantity: 0, color: "#FFE4B5" },
+      { name: "Rum",      price: 1.00, quantity: 0, color: "#E0BBFF" },
+      { name: "Baileys",  price: 1.50, quantity: 0, color: "#CDEFFF" }
+    ]
   },
   { 
     name: "Chocomel",
@@ -419,7 +423,10 @@ let drinks = [
     color: "#E0C8FF",
     imgUrl: "https://www.buurtaal.de/wp-content/uploads/niederlaendische-chocomel-mit-sahne.jpg",
     addOns: [
-      { name: "Sahne", price: 0.50, quantity: 0 }
+      { name: "Sahne", price: 0.50, quantity: 0 },
+      { name: "Amaretto", price: 1.00, quantity: 0, color: "#FFE4B5" },
+      { name: "Rum",      price: 1.00, quantity: 0, color: "#E0BBFF" },
+      { name: "Baileys",  price: 1.50, quantity: 0, color: "#CDEFFF" }
     ]
   },
   { name: "Pils", price: 3.00, quantity: 0, color: "#FFC8E8",
@@ -919,3 +926,4 @@ if (summaryListEl) {
 </script>
 </body>
 </html>
+
